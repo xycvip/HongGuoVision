@@ -4,7 +4,7 @@ import java.net.URI
 import java.util.Locale
 
 enum class UpdateSource(val label: String) {
-    AUTO("默认直连"),
+    AUTO("自动切换"),
     DIRECT("GitHub 直连"),
     PROXY_PRIMARY("加速线路 1"),
     PROXY_BACKUP("加速线路 2"),
@@ -22,11 +22,11 @@ object UpdateSources {
 
     fun routes(canonicalUrl: String, source: UpdateSource): List<UpdateRoute> {
         canonicalUri(canonicalUrl)
-        // A selected source is an exact route: never rotate or retry through another source.
-        // AUTO is retained for existing preferences and means the default GitHub direct route.
-        val choice = if (source == UpdateSource.AUTO) UpdateSource.DIRECT else source
-        val routedUrl = proxyHosts[choice]?.let { "https://$it/$canonicalUrl" } ?: canonicalUrl
-        return listOf(UpdateRoute(choice, routedUrl))
+        val sources = if (source == UpdateSource.AUTO)
+            listOf(UpdateSource.DIRECT, UpdateSource.PROXY_PRIMARY, UpdateSource.PROXY_BACKUP) else listOf(source)
+        return sources.map { choice ->
+            UpdateRoute(choice, proxyHosts[choice]?.let { "https://$it/$canonicalUrl" } ?: canonicalUrl)
+        }
     }
 
     fun checkedTransportUri(raw: String): URI {
