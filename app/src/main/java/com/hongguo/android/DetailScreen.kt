@@ -29,12 +29,12 @@ internal fun DetailScreen(state: HongguoUiState, model: HongguoViewModel, accoun
     Column(Modifier.fillMaxSize()) {
         Row(Modifier.fillMaxWidth().padding(start = 8.dp, end = 20.dp, top = 2.dp, bottom = 6.dp),
             verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = model::closeDetail, modifier = Modifier.testTag("detail_back")) {
+            IconButton(onClick = model::closeDetail, modifier = Modifier.tvFocusVisual().testTag("detail_back")) {
                 Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "返回")
             }
             Text("剧集详情", fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
         }
-        LazyColumn(Modifier.fillMaxWidth().weight(1f).testTag("episode_list"),
+        LazyColumn(Modifier.fillMaxWidth().weight(1f).tvFocusVisual().testTag("episode_list"),
             contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)) {
             item {
@@ -83,7 +83,7 @@ internal fun DetailScreen(state: HongguoUiState, model: HongguoViewModel, accoun
                             else {
                                 val selected = state.episodePosition == index
                                 Surface(onClick = { model.playEpisode(index) }, modifier = Modifier.weight(1f).heightIn(min = 48.dp)
-                                    .testTag("episode_$index"), shape = RoundedCornerShape(12.dp),
+                                    .tvFocusVisual().testTag("episode_$index"), shape = RoundedCornerShape(12.dp),
                                     color = if (selected) Orange else CardSurface) {
                                     Box(Modifier.padding(vertical = 13.dp), contentAlignment = Alignment.Center) {
                                         Text("${episode.index}", fontSize = 15.sp,
@@ -102,7 +102,7 @@ internal fun DetailScreen(state: HongguoUiState, model: HongguoViewModel, accoun
             Surface(color = Canvas) {
                 val episode = detail.episodes.getOrNull(state.episodePosition)?.index ?: detail.episodes.first().index
                 Button(onClick = model::openPlayer, modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp)
-                    .heightIn(min = 50.dp).testTag("open_player"), shape = RoundedCornerShape(14.dp)) {
+                    .heightIn(min = 50.dp).tvFocusVisual().testTag("open_player"), shape = RoundedCornerShape(14.dp)) {
                     Icon(Icons.Outlined.PlayArrow, contentDescription = null, Modifier.size(22.dp))
                     Spacer(Modifier.width(7.dp))
                     Text("播放第 $episode 集", fontSize = 16.sp)
