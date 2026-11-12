@@ -103,7 +103,7 @@ private fun entryCaption(entry: LibraryEntry) = when {
 internal fun LibraryPosterCell(entry: LibraryEntry, caption: String?, tag: String, modifier: Modifier, enabled: Boolean = true,
                                showProgress: Boolean = false, onOpen: () -> Unit,
                                badge: @Composable BoxScope.() -> Unit = {}, footer: @Composable ColumnScope.() -> Unit = {}) {
-    Column(modifier.clickable(enabled = enabled, role = Role.Button, onClick = onOpen).testTag(tag), verticalArrangement = Arrangement.spacedBy(5.dp)) {
+    Column(modifier.tvFocusVisual().clickable(enabled = enabled, role = Role.Button, onClick = onOpen).testTag(tag), verticalArrangement = Arrangement.spacedBy(5.dp)) {
         Box(Modifier.fillMaxWidth().aspectRatio(.75f).clip(RoundedCornerShape(12.dp))) {
             Cover(entry.card.cover, entry.card.title, Modifier.fillMaxSize())
             if (showProgress) WatchProgress(entry, track = Color.White.copy(alpha = .3f), fill = Orange, modifier = Modifier.align(Alignment.BottomCenter))
