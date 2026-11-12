@@ -676,10 +676,10 @@ private fun TvMineContent(
         }
         Text("本机片单", color = TvText, fontSize = 20.sp, fontWeight = FontWeight.Bold)
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            TvMineTile("本机收藏", state.favorites.size.toString(), "打开收藏") {
+            TvMineTile("本机收藏", state.favorites.size.toString(), "打开收藏", Modifier.weight(1f)) {
                 model.selectTab(AppTab.LOCAL_FAVORITES)
             }
-            TvMineTile("本机看过", state.history.size.toString(), "观看记录") {
+            TvMineTile("本机看过", state.history.size.toString(), "观看记录", Modifier.weight(1f)) {
                 model.openPlayHistory(local = true)
             }
         }
@@ -695,11 +695,11 @@ private fun TvMineContent(
 }
 
 @Composable
-private fun TvMineTile(title: String, count: String, action: String, onClick: () -> Unit) {
+private fun TvMineTile(title: String, count: String, action: String, modifier: Modifier, onClick: () -> Unit) {
     var focused by remember { mutableStateOf(false) }
     Surface(onClick = onClick, shape = RoundedCornerShape(18.dp), color = if (focused) TvPanelFocused else TvPanel,
         border = if (focused) BorderStroke(2.dp, TvAccent) else null,
-        modifier = Modifier.weight(1f).height(130.dp).onFocusChanged { focused = it.isFocused }) {
+        modifier = modifier.fillMaxWidth().height(130.dp).onFocusChanged { focused = it.isFocused }) {
         Column(Modifier.fillMaxSize().padding(18.dp), verticalArrangement = Arrangement.spacedBy(7.dp)) {
             Text(title, color = TvMuted, fontSize = 15.sp)
             Text(count, color = TvText, fontSize = 28.sp, fontWeight = FontWeight.Black)
