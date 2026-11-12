@@ -83,7 +83,7 @@ internal fun Activity.requestPlayerFullScreen(fullScreen: Boolean) {
 @Composable
 internal fun FullScreenWatchButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
     Surface(onClick = onClick, color = Color.White.copy(alpha = .14f), contentColor = Color.White, shape = RoundedCornerShape(8.dp),
-        modifier = modifier.testTag("player_full_screen").semantics { role = Role.Button; contentDescription = "全屏观看" }) {
+        modifier = modifier.tvFocusVisual().testTag("player_full_screen").semantics { role = Role.Button; contentDescription = "全屏观看" }) {
         Row(Modifier.padding(horizontal = 13.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
             Icon(Icons.Rounded.ScreenRotation, null, modifier = Modifier.size(17.dp))
             Spacer(Modifier.width(6.dp))
