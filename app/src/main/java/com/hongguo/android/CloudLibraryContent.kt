@@ -60,7 +60,7 @@ internal fun CloudLibraryContent(
         if (owner != null && state.sessionStatus == AccountSessionStatus.LOGGED_IN && !state.busy) accountModel.refresh()
     }
     var removeTarget by remember(owner, state.sessionStatus) { mutableStateOf<LibraryEntry?>(null) }
-    LazyColumn(Modifier.fillMaxSize().testTag("cloud_library"), contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp).plusNavClearance(),
+    LazyColumn(Modifier.fillMaxSize().tvFocusVisual().testTag("cloud_library"), contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp).plusNavClearance(),
         verticalArrangement = Arrangement.spacedBy(12.dp)) {
         state.message?.let { message -> item { AccountNotice(message, "知道了", accountModel::consumeMessage, tag = "cloud_message") } }
         if (state.sessionStatus == AccountSessionStatus.LOGGED_IN && state.profile != null) {
@@ -74,7 +74,7 @@ internal fun CloudLibraryContent(
             cloudLibraryItems(state, accountModel, onOpenLibrary, { removeTarget = it }, showTitle = false)
         } else {
             item {
-                Column(Modifier.fillMaxWidth().padding(vertical = 32.dp).testTag("cloud_account_status"),
+                Column(Modifier.fillMaxWidth().padding(vertical = 32.dp).tvFocusVisual().testTag("cloud_account_status"),
                     verticalArrangement = Arrangement.spacedBy(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                     Icon(Icons.Outlined.CloudQueue, null, Modifier.size(36.dp), tint = Muted)
                     Text(when (state.sessionStatus) {
@@ -90,7 +90,7 @@ internal fun CloudLibraryContent(
                         else -> "本机记录单独保留，登录不会上传本机旧记录。"
                     }, color = Muted, fontSize = 14.sp, lineHeight = 22.sp)
                     if (state.sessionStatus == AccountSessionStatus.RESTORING) CircularProgressIndicator(Modifier.size(22.dp), strokeWidth = 2.dp)
-                    Button(onClick = onSignIn, modifier = Modifier.testTag("cloud_open_account")) {
+                    Button(onClick = onSignIn, modifier = Modifier.tvFocusVisual().testTag("cloud_open_account")) {
                         Text(if (state.sessionStatus == AccountSessionStatus.SIGNED_OUT) "登录红果账号" else "打开账号管理", fontSize = 14.sp)
                     }
                 }
@@ -112,7 +112,7 @@ internal fun AccountHistoryList(accountModel: AccountViewModel, onOpenLibrary: (
     LaunchedEffect(owner, state.sessionStatus) {
         if (owner != null && state.sessionStatus == AccountSessionStatus.LOGGED_IN && !state.busy) accountModel.refresh()
     }
-    LazyColumn(modifier.testTag("play_history_account"), contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp).plusNavClearance(),
+    LazyColumn(modifier.tvFocusVisual().testTag("play_history_account"), contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp).plusNavClearance(),
         verticalArrangement = Arrangement.spacedBy(12.dp)) {
         state.historyError?.let { item { AccountNotice(it, "重试", accountModel::refresh, !state.busy, "account_list_error") } }
         if (state.history.isEmpty() && state.historyError == null) item {
@@ -142,7 +142,7 @@ internal fun LazyListScope.cloudLibraryItems(
             Text(if (showTitle) "账号片单" else "红果账号记录", color = Ink, fontWeight = FontWeight.SemiBold,
                 fontSize = if (showTitle) 18.sp else 14.sp, modifier = Modifier.weight(1f))
             if (state.busy) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
-            TextButton(onClick = accountModel::refresh, enabled = !state.busy, modifier = Modifier.testTag("account_refresh")) {
+            TextButton(onClick = accountModel::refresh, enabled = !state.busy, modifier = Modifier.tvFocusVisual().testTag("account_refresh")) {
                 Text("刷新", fontSize = 14.sp)
             }
         }
@@ -150,13 +150,13 @@ internal fun LazyListScope.cloudLibraryItems(
             divider = { HorizontalDivider(color = Cream) }) {
             listOf(AccountSection.HISTORY to "历史", AccountSection.FAVORITES to "收藏", AccountSection.LIKES to "点赞", AccountSection.RESERVATIONS to "预约").forEach { (section, title) ->
                 Tab(selected = state.selectedSection == section, onClick = { accountModel.selectSection(section) },
-                    modifier = Modifier.testTag("account_section_${section.name.lowercase(Locale.ROOT)}"),
+                    modifier = Modifier.tvFocusVisual().testTag("account_section_${section.name.lowercase(Locale.ROOT)}"),
                     selectedContentColor = AccentInk, unselectedContentColor = Muted,
                     text = { Text(title, fontSize = 16.sp, fontWeight = if (state.selectedSection == section) FontWeight.SemiBold else FontWeight.Normal) })
             }
         }
         // The account page shows these in its header.
-        if (!showTitle) accountStatsLine(state)?.let { Text(it, color = Muted, fontSize = 12.sp, modifier = Modifier.padding(top = 12.dp).testTag("account_stats")) }
+        if (!showTitle) accountStatsLine(state)?.let { Text(it, color = Muted, fontSize = 12.sp, modifier = Modifier.padding(top = 12.dp).tvFocusVisual().testTag("account_stats")) }
     }
     val entries = when (state.selectedSection) {
         AccountSection.HISTORY -> state.history
@@ -218,9 +218,9 @@ private fun AccountLibraryCell(entry: LibraryEntry, section: AccountSection, can
         if (section == AccountSection.FAVORITES) {
             if (favoriteBusy) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
             else if (uncertain) TextButton(onClick = onResolve, contentPadding = PaddingValues(0.dp),
-                modifier = Modifier.testTag("account_favorite_resolve_${entry.card.id}")) { Text("核对状态", fontSize = 12.sp, maxLines = 1) }
+                modifier = Modifier.tvFocusVisual().testTag("account_favorite_resolve_${entry.card.id}")) { Text("核对状态", fontSize = 12.sp, maxLines = 1) }
             else TextButton(onClick = onRemove, contentPadding = PaddingValues(0.dp),
-                modifier = Modifier.testTag("account_favorite_remove_${entry.card.id}")) { Text("取消收藏", fontSize = 12.sp, maxLines = 1) }
+                modifier = Modifier.tvFocusVisual().testTag("account_favorite_remove_${entry.card.id}")) { Text("取消收藏", fontSize = 12.sp, maxLines = 1) }
         }
     })
 }
@@ -228,7 +228,7 @@ private fun AccountLibraryCell(entry: LibraryEntry, section: AccountSection, can
 @Composable
 internal fun AccountNotice(message: String, action: String? = null, onAction: () -> Unit = {}, enabled: Boolean = true, tag: String) {
     Surface(color = Cream, shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)) {
-        Column(Modifier.fillMaxWidth().padding(16.dp).testTag(tag), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(Modifier.fillMaxWidth().padding(16.dp).tvFocusVisual().testTag(tag), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text(message, color = Muted, fontSize = 14.sp, lineHeight = 22.sp)
             if (action != null) TextButton(onClick = onAction, enabled = enabled) { Text(action, fontSize = 14.sp) }
         }
