@@ -11,10 +11,10 @@ import androidx.activity.compose.setContent
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -38,15 +38,12 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,17 +51,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.platform.testTag
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.hongguo.account.AccountSessionStatus
@@ -99,7 +91,7 @@ internal class TvActivity : ComponentActivity() {
             LaunchedEffect(signedIn) { model.onAccountSession(signedIn) }
             HongguoTheme(AppThemeStyle.IMMERSIVE, dark = true) {
                 if (state.playerOpen && state.detail != null) {
-                    TvPlayerScreen(state, model)
+                    EpisodePlayerScreen(state, model, accountModel, active = true)
                 } else {
                     TvMainScreen(state, model, accountModel, updateState, updateModel,
                         accountName = if (accountState.sessionStatus == AccountSessionStatus.WEBSITE_ONLY)
@@ -117,94 +109,6 @@ internal class TvActivity : ComponentActivity() {
             }
         }
     }
-}
-
-
-@Composable
-private fun TvPlayerScreen(state: HongguoUiState, model: HongguoViewModel) {
-    val detail = state.detail ?: return
-    if (detail.episodes.isEmpty()) return
-    val lifecycle = LocalLifecycleOwner.current.lifecycle
-    val selected = state.episodePosition.coerceIn(detail.episodes.indices)
-    val episode = detail.episodes[selected]
-    val playback = rememberVideoPlayback(state.video, state.resumePositionMs, model,
-        enabled = true, playbackSpeed = state.playbackSpeed)
-    var showEpisodes by rememberSaveable(detail.id) { mutableStateOf(false) }
-    val firstControl = remember(detail.id) { FocusRequester() }
-    LaunchedEffect(detail.id) { runCatching { firstControl.requestFocus() } }
-
-    DisposableEffect(lifecycle, model) {
-        val observer = LifecycleEventObserver { _, event ->
-            when (event) {
-                Lifecycle.Event.ON_START -> model.onPlayerForeground(true)
-                Lifecycle.Event.ON_STOP -> model.onPlayerForeground(false)
-                else -> Unit
-            }
-        }
-        lifecycle.addObserver(observer)
-        if (lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) model.onPlayerForeground(true)
-        onDispose {
-            lifecycle.removeObserver(observer)
-            model.onPlayerForeground(false)
-        }
-    }
-    BackHandler { model.closePlayer() }
-
-    Box(Modifier.fillMaxSize().background(Color.Black)) {
-        VideoSurface(playback, Modifier.fillMaxSize())
-        if (playback.player == null || playback.isBuffering || !state.firstFrameRendered) {
-            Column(Modifier.align(Alignment.Center), horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                CircularProgressIndicator(color = TvAccent)
-                Text(state.playbackError ?: state.playbackStatus.ifBlank { state.preparationStage.ifBlank { "正在准备播放" } },
-                    color = Color.White, fontSize = 15.sp)
-            }
-        }
-        Column(Modifier.align(Alignment.BottomCenter).fillMaxWidth()
-            .background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = .94f))))
-            .padding(horizontal = 34.dp, vertical = 22.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text(detail.title + "  ·  第 " + episode.index + " 集", color = Color.White,
-                fontSize = 21.sp, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Slider(
-                value = if (playback.durationMs > 0) (playback.positionMs.toFloat() / playback.durationMs).coerceIn(0f, 1f) else 0f,
-                onValueChange = { fraction ->
-                    if (playback.durationMs > 0) playback.player?.seekTo((playback.durationMs * fraction).toLong())
-                },
-                enabled = playback.durationMs > 0,
-                modifier = Modifier.fillMaxWidth()
-            )
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
-                TvAction("返回详情", onClick = model::closePlayer, modifier = Modifier.focusRequester(firstControl), secondary = true)
-                TvAction("上一集", onClick = { model.playEpisode(selected - 1) }, enabled = selected > 0, secondary = true)
-                TvAction(if (playback.isPlaying) "暂停" else "继续播放", onClick = {
-                    playback.player?.let { player ->
-                        if (player.isPlaying) player.pause() else player.play()
-                    }
-                })
-                TvAction("下一集", onClick = { model.playEpisode(selected + 1) },
-                    enabled = selected < detail.episodes.lastIndex, secondary = true)
-                TvAction(if (showEpisodes) "收起选集" else "选集", onClick = { showEpisodes = !showEpisodes }, secondary = true)
-                Spacer(Modifier.weight(1f))
-                Text(if (playback.durationMs > 0) playerTime(playback.positionMs) + " / " + playerTime(playback.durationMs)
-                    else state.playbackStatus, color = Color.White.copy(alpha = .75f), fontSize = 13.sp)
-            }
-            if (showEpisodes) {
-                LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), contentPadding = PaddingValues(vertical = 4.dp)) {
-                    itemsIndexed(detail.episodes) { index, item ->
-                        TvAction("第 " + item.index + " 集", onClick = {
-                            showEpisodes = false
-                            model.playEpisode(index)
-                        }, secondary = index == selected)
-                    }
-                }
-            }
-        }
-    }
-}
-
-private fun playerTime(positionMs: Long): String {
-    val seconds = positionMs.coerceAtLeast(0) / 1000
-    return "%02d:%02d".format(seconds / 60, seconds % 60)
 }
 
 @Composable
@@ -290,7 +194,7 @@ private fun TvSidebar(selected: AppTab, onSelect: (AppTab) -> Unit) {
                 border = if (focused) BorderStroke(2.dp, TvAccent) else null,
                 modifier = Modifier.fillMaxWidth().height(54.dp)
                     .then(if (index == 0) Modifier.focusRequester(firstFocus) else Modifier)
-                    .onFocusChanged { focused = it.isFocused }) {
+                    .onFocusChanged { focused = it.isFocused }.focusable()) {
                 Box(Modifier.padding(horizontal = 18.dp).fillMaxSize(), contentAlignment = Alignment.CenterStart) {
                     Text(label, color = if (selectedItem || focused) TvText else TvMuted,
                         fontSize = 17.sp, fontWeight = if (selectedItem || focused) FontWeight.Bold else FontWeight.Medium)
@@ -388,7 +292,7 @@ private fun TvPosterCard(card: DramaCard, subtitle: String, onClick: () -> Unit)
     Column(Modifier.width(142.dp).graphicsLayer(scaleX = scale, scaleY = scale)
         .onFocusChanged { focused = it.isFocused }.clip(RoundedCornerShape(13.dp))
         .background(if (focused) TvPanelFocused else Color.Transparent)
-        .clickable(onClick = onClick).border(BorderStroke(2.dp, if (focused) TvAccent else Color.Transparent), RoundedCornerShape(13.dp)).padding(5.dp).testTag("tv_card_" + card.id),
+        .clickable(onClick = onClick).focusable().padding(5.dp).testTag("tv_card_" + card.id),
         verticalArrangement = Arrangement.spacedBy(7.dp)) {
         PosterImage(card.cover, Modifier.fillMaxWidth().aspectRatio(.72f).clip(RoundedCornerShape(10.dp)))
         Text(card.title, color = if (focused) TvText else TvMuted, fontSize = 14.sp,
@@ -439,7 +343,7 @@ private fun TvRankContent(state: HongguoUiState, model: HongguoViewModel) {
                     var focused by remember { mutableStateOf(false) }
                     Row(Modifier.fillMaxWidth().height(116.dp).clip(RoundedCornerShape(14.dp))
                         .background(if (focused) TvPanelFocused else TvPanel).clickable { model.openDrama(card) }
-                        .onFocusChanged { focused = it.isFocused }.padding(8.dp),
+                        .onFocusChanged { focused = it.isFocused }.focusable().padding(8.dp),
                         horizontalArrangement = Arrangement.spacedBy(18.dp), verticalAlignment = Alignment.CenterVertically) {
                         Text(entry.rank.toString(), color = TvAccent, fontSize = 23.sp, fontWeight = FontWeight.Black,
                             modifier = Modifier.width(38.dp))

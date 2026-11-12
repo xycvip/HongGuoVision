@@ -9,6 +9,7 @@
         android:name=".HongguoApplication"
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
+        android:banner="@drawable/tv_banner"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:label="红果独立版"
         android:supportsRtl="true"
