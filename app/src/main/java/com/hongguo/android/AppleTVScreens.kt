@@ -23,7 +23,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.GridView
 import androidx.compose.material.icons.outlined.Leaderboard
-import androidx.compose.material.icons.outlined.PersonOutline
+import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.SmartDisplay
@@ -110,7 +110,7 @@ internal fun AppleTVLibraryScreen(
                 modifier = Modifier.focusRequester(findFocus)) { model.selectTab(AppTab.CATEGORY) }
             AppleTVTabButton("榜单", Icons.Outlined.Leaderboard, state.tab == AppTab.RANK,
                 modifier = Modifier.focusRequester(rankFocus)) { model.openRank() }
-            AppleTVTabButton("我的", Icons.Outlined.PersonOutline,
+            AppleTVTabButton("我的", Icons.Outlined.AccountCircle,
                 state.tab in setOf(AppTab.MINE, AppTab.FAVORITES, AppTab.HISTORY, AppTab.ACCOUNT,
                     AppTab.SETTINGS, AppTab.THEME_STYLE, AppTab.PLAY_HISTORY, AppTab.LOCAL_FAVORITES),
                 modifier = Modifier.focusRequester(mineFocus)) { model.selectTab(AppTab.MINE) }
