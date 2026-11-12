@@ -141,6 +141,7 @@ object LibraryCodec {
             cover = string(card["cover"], 2048),
             episodeCount = nonNegativeLong(card["episode_count"]).coerceAtMost(Int.MAX_VALUE.toLong()).toInt(),
             summary = string(card["summary"], 4000),
+            badge = string(card["badge"], 256),
         )
         LibraryEntry(metadata, episode,
             nonNegativeLong(row["episode_index"]).coerceAtMost(Int.MAX_VALUE.toLong()).toInt(),
@@ -168,13 +169,13 @@ object LibraryCodec {
     private fun normalizedCard(card: DramaCard): DramaCard? {
         val cardId = id(card.id) ?: return null
         return card.copy(id = cardId, title = card.title.take(256), cover = card.cover.take(2048),
-            episodeCount = card.episodeCount.coerceAtLeast(0), summary = card.summary.take(4000))
+            episodeCount = card.episodeCount.coerceAtLeast(0), summary = card.summary.take(4000), badge = card.badge.take(256))
     }
 
     private fun entryObject(entry: LibraryEntry): Map<String, Any> = linkedMapOf(
         "card" to linkedMapOf(
             "id" to entry.card.id, "title" to entry.card.title, "cover" to entry.card.cover,
-            "episode_count" to entry.card.episodeCount, "summary" to entry.card.summary,
+            "episode_count" to entry.card.episodeCount, "summary" to entry.card.summary, "badge" to entry.card.badge,
         ),
         "episode_id" to entry.episodeId,
         "episode_index" to entry.episodeIndex,
