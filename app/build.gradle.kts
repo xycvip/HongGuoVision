@@ -8,13 +8,13 @@ android {
     namespace = "com.hongguo.android"
     compileSdk = 36
     defaultConfig {
-        applicationId = "com.hongguo.android"
+        applicationId = "com.x.hgvision"
         minSdk = 26
         targetSdk = 36
         versionCode = providers.gradleProperty("appVersionCode").orElse("38").get().toInt()
         versionName = providers.gradleProperty("appVersionName").orElse("0.7.27").get()
-        buildConfigField("String", "UPDATE_REPOSITORY", "\"OOIUa/hongguo-android\"")
-        buildConfigField("String", "UPDATE_MANIFEST_URL", "\"https://github.com/OOIUa/hongguo-android/releases/latest/download/update.json\"")
+        buildConfigField("String", "UPDATE_REPOSITORY", "\"xycvip/HongGuoVision\"")
+        buildConfigField("String", "UPDATE_MANIFEST_URL", "\"https://github.com/xycvip/HongGuoVision/releases/latest/download/update.json\"")
         testInstrumentationRunner = "com.hongguo.android.HongguoTestRunner"
     }
     buildTypes {
