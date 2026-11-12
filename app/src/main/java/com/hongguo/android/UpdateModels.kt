@@ -26,7 +26,7 @@ data class AppUpdate(
 object UpdateManifestCodec {
     const val MAX_MANIFEST_BYTES = 128 * 1024
     const val MAX_APK_BYTES = 150L * 1024 * 1024
-    private const val APPLICATION_ID = "com.hongguo.android"
+    private const val APPLICATION_ID = "com.x.hgvision"
 
     fun parse(json: String, expectedRepository: String): AppUpdate {
         val repository = validatedRepository(expectedRepository)
