@@ -911,8 +911,9 @@ class HongguoViewModel(application: Application) : AndroidViewModel(application)
         releaseVideo(state.value.video)
     }
 
-    private fun cardFor(detail: DramaDetail) = DramaCard(detail.id, detail.title, detail.cover,
-        detail.episodes.size, detail.summary)
+    private fun cardFor(detail: DramaDetail) = state.value.selectedCard?.takeIf { it.id == detail.id }?.copy(
+        title = detail.title, cover = detail.cover, episodeCount = detail.episodes.size, summary = detail.summary,
+    ) ?: DramaCard(detail.id, detail.title, detail.cover, detail.episodes.size, detail.summary)
 
     override fun onCleared() {
         cancelSearch()
