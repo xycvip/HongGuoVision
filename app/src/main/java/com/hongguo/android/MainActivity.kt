@@ -265,7 +265,7 @@ class MainActivity : ComponentActivity() {
                     }
                 }
                 }
-                if (state.themeOnboardingPending) {
+                if (state.themeOnboardingPending && !tvMode) {
                     ThemeOnboardingDialog(current = state.themeStyle,
                         onConfirm = { choice -> model.completeThemeOnboarding(choice) },
                         onSkip = { model.completeThemeOnboarding(null) })
