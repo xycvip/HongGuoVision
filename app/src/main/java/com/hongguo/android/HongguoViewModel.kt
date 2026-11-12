@@ -155,6 +155,7 @@ class HongguoViewModel(application: Application) : AndroidViewModel(application)
     @Volatile private var detailVersion = 0
     @Volatile private var mediaVersion = 0
     private var homeVersion = 0
+    private var pendingHomeTrial = false
     private var categoryVersion = 0
     private var filtersVersion = 0
     private var searchOrigin = AppTab.HOME
@@ -282,6 +283,13 @@ class HongguoViewModel(application: Application) : AndroidViewModel(application)
     fun refreshHome() = requestHome(false)
     fun loadMoreHome() = requestHome(true)
 
+    /** Matches the tvOS action: play the first recommendation, loading the shelf first when empty. */
+    fun startHomeTrial() {
+        state.value.home.items.firstOrNull()?.let { playDrama(it); return }
+        pendingHomeTrial = true
+        if (!state.value.home.loading && !state.value.home.loadingMore) refreshHome()
+    }
+
     private fun requestHome(append: Boolean) {
         val current = state.value
         if (append && (current.home.loading || current.home.loadingMore || !current.home.hasMore)) return
@@ -295,11 +303,18 @@ class HongguoViewModel(application: Application) : AndroidViewModel(application)
                     else repository.discover(current.homeFeed, if (append) previous.nextOffset else 0, previous.items.map { it.id })
                 if (version != homeVersion || !currentCoroutineContext().isActive) return@launch
                 mutableState.update { it.copy(home = mergePage(previous, page, append)) }
+                if (!append && pendingHomeTrial) {
+                    pendingHomeTrial = false
+                    page.items.firstOrNull()?.let(::playDrama)
+                }
             } catch (error: CancellationException) { throw error }
             catch (error: Exception) {
-                if (version == homeVersion) mutableState.update { it.copy(home = previous.copy(
+                if (version == homeVersion) {
+                    pendingHomeTrial = false
+                    mutableState.update { it.copy(home = previous.copy(
                     loading = false, loadingMore = false, loaded = true, error = readableFailure(error,
                         if (current.homeFeed == HomeFeed.GUESS) "加载推荐" else "加载首页"))) }
+                }
             }
         }
     }
