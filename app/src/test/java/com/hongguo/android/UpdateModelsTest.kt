@@ -1,4 +1,4 @@
-package com.hongguo.android
+package com.x.hgvision
 
 import com.hongguo.api.util.Json
 import kotlinx.coroutines.runBlocking
@@ -11,7 +11,7 @@ class UpdateModelsTest {
     private val hash = "aB".repeat(32)
 
     private fun manifest(vararg changes: Pair<String, Any?>): String = Json.stringify(linkedMapOf<String, Any?>(
-        "schemaVersion" to 1, "applicationId" to "com.hongguo.android", "versionCode" to 3,
+        "schemaVersion" to 1, "applicationId" to "com.x.hgvision", "versionCode" to 3,
         "versionName" to "0.3.0", "apkUrl" to "https://github.com/$repository/releases/download/v0.3.0/hongguo.apk",
         "sha256" to hash, "sizeBytes" to 15_000_000, "minSdk" to 26, "notes" to "新增在线更新。",
         "publishedAt" to "2026-10-23T08:00:00Z",
