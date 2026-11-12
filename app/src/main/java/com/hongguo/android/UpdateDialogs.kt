@@ -74,7 +74,7 @@ internal fun UpdateDialogs(state: UpdateUiState, model: UpdateViewModel, activit
         properties = DialogProperties(dismissOnBackPress = !state.downloading, dismissOnClickOutside = !state.downloading)) {
         Surface(shape = RoundedCornerShape(16.dp), color = Canvas,
             modifier = Modifier.fillMaxWidth().heightIn(max = (screenHeight * .9f).dp)
-                .testTag("update_dialog").semantics { testTagsAsResourceId = true }) {
+                .tvFocusVisual().testTag("update_dialog").semantics { testTagsAsResourceId = true }) {
             Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     Box(Modifier.size(40.dp).clip(RoundedCornerShape(12.dp)).background(Cream), Alignment.Center) {
@@ -97,7 +97,7 @@ internal fun UpdateDialogs(state: UpdateUiState, model: UpdateViewModel, activit
                                     FilterChip(selected = state.source == source, enabled = !state.downloading,
                                         onClick = { model.selectSource(source) },
                                         label = { Text(source.label, fontSize = 12.sp) },
-                                        modifier = Modifier.weight(1f).testTag("update_source_${source.name.lowercase(Locale.ROOT)}"))
+                                        modifier = Modifier.weight(1f).tvFocusVisual().testTag("update_source_${source.name.lowercase(Locale.ROOT)}"))
                                 }
                             }
                         }
@@ -163,29 +163,29 @@ internal fun UpdateDialogs(state: UpdateUiState, model: UpdateViewModel, activit
                 Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(5.dp)) {
                     when {
                         state.downloading -> OutlinedButton(onClick = model::cancelDownload,
-                            modifier = Modifier.fillMaxWidth().testTag("update_cancel"), shape = RoundedCornerShape(16.dp)) {
+                            modifier = Modifier.fillMaxWidth().tvFocusVisual().testTag("update_cancel"), shape = RoundedCornerShape(16.dp)) {
                             Text("取消下载")
                         }
                         state.installPermissionRequired -> Button(onClick = { model.openInstaller(activity) },
-                            modifier = Modifier.fillMaxWidth().testTag("update_permission"), shape = RoundedCornerShape(16.dp)) {
+                            modifier = Modifier.fillMaxWidth().tvFocusVisual().testTag("update_permission"), shape = RoundedCornerShape(16.dp)) {
                             Text("允许安装此应用的更新")
                         }
                         state.downloadedFile != null -> Button(onClick = { model.openInstaller(activity) },
-                            modifier = Modifier.fillMaxWidth().testTag("update_install"), shape = RoundedCornerShape(16.dp)) {
+                            modifier = Modifier.fillMaxWidth().tvFocusVisual().testTag("update_install"), shape = RoundedCornerShape(16.dp)) {
                             Text("安装更新")
                         }
                         state.error != null -> Button(onClick = {
                             if (update != null) model.downloadUpdate() else model.checkForUpdates()
-                        }, modifier = Modifier.fillMaxWidth().testTag("update_retry"), shape = RoundedCornerShape(16.dp)) {
+                        }, modifier = Modifier.fillMaxWidth().tvFocusVisual().testTag("update_retry"), shape = RoundedCornerShape(16.dp)) {
                             Text("重试")
                         }
                         update != null && !state.checking -> Button(onClick = model::downloadUpdate,
-                            modifier = Modifier.fillMaxWidth().testTag("update_download"), shape = RoundedCornerShape(16.dp)) {
+                            modifier = Modifier.fillMaxWidth().tvFocusVisual().testTag("update_download"), shape = RoundedCornerShape(16.dp)) {
                             Text("下载更新")
                         }
                     }
                     if (!state.downloading) TextButton(onClick = model::dismiss,
-                        modifier = Modifier.fillMaxWidth().testTag("update_cancel")) {
+                        modifier = Modifier.fillMaxWidth().tvFocusVisual().testTag("update_cancel")) {
                         Text(if (update == null) "关闭" else "稍后", color = Muted)
                     }
                 }
