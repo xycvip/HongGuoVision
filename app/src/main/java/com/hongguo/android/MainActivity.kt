@@ -195,8 +195,7 @@ class MainActivity : ComponentActivity() {
                                         AccountSessionStatus.LOGGED_IN -> "查看账号收藏、历史与预约"
                                         AccountSessionStatus.NEEDS_VERIFICATION -> "已保存账号，等待重新验证"
                                         else -> "登录后查看手机片单"
-                                    },
-                                    onAccount = { model.selectTab(AppTab.ACCOUNT) })
+                                    })
                             } else when (keyTab) {
                                 AppTab.HOME -> when (layout) {
                                     AppThemeStyle.IMMERSIVE -> HongguoTheme(layout, dark = true, applyToWindow = false) { ImmersiveHome(state, model) }
