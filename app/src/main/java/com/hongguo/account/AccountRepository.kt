@@ -860,7 +860,8 @@ class AccountRepository internal constructor(
             }
         }
         fun card(series: Series, count: Int = 0) = DramaCard(series.id, series.title, series.cover,
-            if (count > 0) count else Regex("[0-9]+").find(series.badge)?.value?.toIntOrNull() ?: 0, series.description)
+            if (count > 0) count else Regex("[0-9]+").find(series.badge)?.value?.toIntOrNull() ?: 0,
+            series.description, series.badge)
         fun historyEntry(progress: CloudProgress) = LibraryEntry(card(progress.series, progress.episodeCount), progress.episodeId,
             progress.episodeIndex.coerceAtLeast(0) + 1, progress.position.coerceAtLeast(0), progress.updatedAt.coerceAtLeast(0))
         fun favoriteEntry(favorite: CloudFavorite) = LibraryEntry(card(favorite.series), updatedAt = favorite.collectedAt.coerceAtLeast(0))
