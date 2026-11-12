@@ -8,18 +8,33 @@ android {
     namespace = "com.hongguo.android"
     compileSdk = 36
     defaultConfig {
-        applicationId = "com.hongguo.android"
+        applicationId = "com.x.hgvision"
         minSdk = 26
         targetSdk = 36
         versionCode = providers.gradleProperty("appVersionCode").orElse("38").get().toInt()
         versionName = providers.gradleProperty("appVersionName").orElse("0.7.27").get()
-        buildConfigField("String", "UPDATE_REPOSITORY", "\"OOIUa/hongguo-android\"")
-        buildConfigField("String", "UPDATE_MANIFEST_URL", "\"https://github.com/OOIUa/hongguo-android/releases/latest/download/update.json\"")
+        buildConfigField("String", "UPDATE_REPOSITORY", "\"xycvip/HongGuoVision\"")
+        buildConfigField("String", "UPDATE_MANIFEST_URL", "\"https://github.com/xycvip/HongGuoVision/releases/latest/download/update.json\"")
         testInstrumentationRunner = "com.hongguo.android.HongguoTestRunner"
+    }
+    signingConfigs {
+        create("release") {
+            val keystorePath = System.getenv("SIGNING_KEYSTORE_PATH")
+            storeFile = keystorePath?.takeIf { it.isNotBlank() }?.let { file(it) }
+            storePassword = System.getenv("SIGNING_STORE_PASSWORD")
+            keyAlias = System.getenv("SIGNING_KEY_ALIAS")
+            keyPassword = System.getenv("SIGNING_KEY_PASSWORD")
+        }
     }
     buildTypes {
         release {
-            isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("release")
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
         }
     }
     compileOptions {

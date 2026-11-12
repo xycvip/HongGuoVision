@@ -1,7 +1,7 @@
 param(
     [string]$Apk = 'app/build/outputs/apk/debug/app-debug.apk',
     [string]$OutputDirectory = '../dist',
-    [string]$Repository = 'OOIUa/hongguo-android'
+    [string]$Repository = 'xycvip/HongGuoVision'
 )
 $ErrorActionPreference = 'Stop'
 $project = Split-Path $PSScriptRoot -Parent
@@ -17,7 +17,7 @@ try {
     $apksigner = Join-Path $buildTools ($(if ($onWindows) { 'apksigner.bat' } else { 'apksigner' }))
     $badging = (& $aapt dump badging $apkPath) -join "`n"
     if ($LASTEXITCODE -ne 0) { throw 'Cannot inspect APK.' }
-    if ($badging -notmatch "package: name='com.hongguo.android' versionCode='(\d+)' versionName='([^']+)'") {
+    if ($badging -notmatch "package: name='com.x.hgvision' versionCode='(\d+)' versionName='([^']+)'") {
         throw 'Unexpected application ID or APK metadata.'
     }
     $code = [long]$Matches[1]
@@ -44,7 +44,7 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'Source archive failed.' }
     $manifest = [ordered]@{
         schemaVersion = 1
-        applicationId = 'com.hongguo.android'
+        applicationId = 'com.x.hgvision'
         versionCode = $code
         versionName = $version
         apkUrl = "https://github.com/$Repository/releases/download/v$version/$apkName"

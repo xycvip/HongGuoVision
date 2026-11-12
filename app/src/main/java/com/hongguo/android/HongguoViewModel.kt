@@ -94,6 +94,7 @@ data class HongguoUiState(
     val autoPlayNext: Boolean = true,
     val preloadNext: Boolean = true,
     val playbackSpeed: Float = 1f,
+    val playbackQuality: String = "auto",
     val themeStyle: AppThemeStyle = AppThemeStyle.WARM,
     val themeMode: ThemeMode? = null,
     val navBarStyle: NavBarStyle = NavBarStyle.CLASSIC,
@@ -111,6 +112,8 @@ class HongguoViewModel(application: Application) : AndroidViewModel(application)
         autoPlayNext = preferences.getBoolean("auto_play_next", true), preloadNext = preferences.getBoolean("preload_next", true),
         playbackSpeed = runCatching { preferences.getFloat("playback_speed", 1f) }.getOrDefault(1f)
             .takeIf { it in PlaybackSpeeds } ?: 1f,
+        playbackQuality = preferences.getString("playback_quality", "auto").orEmpty()
+            .takeIf { it in PlaybackQualities } ?: "auto",
         themeStyle = AppThemeStyle.fromKey(preferences.getString(ThemePreferences.STYLE, null)),
         themeMode = ThemeMode.stored(preferences.getString(ThemePreferences.MODE, null),
             preferences.getBoolean(ThemePreferences.DARK_FOLLOWS_SYSTEM, false)),
@@ -451,6 +454,19 @@ class HongguoViewModel(application: Application) : AndroidViewModel(application)
         mutableState.update { it.copy(playbackSpeed = speed) }
     }
 
+    /** Changes source quality without losing the current playback position. */
+    fun setPlaybackQuality(quality: String, resumePositionMs: Long? = null) {
+        if (quality !in PlaybackQualities || quality == state.value.playbackQuality) return
+        val current = state.value
+        preferences.edit { putString("playback_quality", quality) }
+        mutableState.update { it.copy(playbackQuality = quality) }
+        if (current.playerOpen && current.detail != null && current.episodePosition >= 0) {
+            takePrefetch(null)
+            prefetchAttemptedFor = -1
+            playEpisode(current.episodePosition, resumeOverrideMs = resumePositionMs ?: current.resumePositionMs)
+        }
+    }
+
     fun updateQuery(value: String) {
         mutableState.update { it.copy(query = value) }
         suggestionJob?.cancel()
@@ -629,7 +645,7 @@ class HongguoViewModel(application: Application) : AndroidViewModel(application)
         releaseVideo(current.video)
         mediaJob = viewModelScope.launch {
             try {
-                val prepared = warmed ?: repository.prepare(episode) { stage, done, total ->
+                val prepared = warmed ?: repository.prepare(episode, quality = current.playbackQuality) { stage, done, total ->
                     if (version == mediaVersion) mutableState.update {
                         it.copy(preparationStage = stage, preparationDone = done, preparationTotal = total)
                     }
@@ -698,6 +714,12 @@ class HongguoViewModel(application: Application) : AndroidViewModel(application)
         releaseVideo(previous)
     }
 
+    /** tvOS Menu exits playback to the selected library page instead of opening a separate detail screen. */
+    fun closePlayerToLibrary() {
+        closePlayer()
+        backToSearch()
+    }
+
     fun onPlayerForeground(active: Boolean) {
         if (active && !playerForeground) prefetchAttemptedFor = -1
         playerForeground = active
@@ -729,7 +751,7 @@ class HongguoViewModel(application: Application) : AndroidViewModel(application)
         prefetchJob = viewModelScope.launch {
             var ready = false
             try {
-                val prepared = repository.prepare(episode, allowFallback = false) { _, _, _ -> }
+                val prepared = repository.prepare(episode, quality = current.playbackQuality, allowFallback = false) { _, _, _ -> }
                 slot.video = prepared
                 if (warmSlot !== slot || !playerForeground) return@launch
                 repository.warmNext(prepared) { reader ->

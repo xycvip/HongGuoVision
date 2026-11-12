@@ -22,7 +22,7 @@ class UpdateHttpTest {
     private val repository = "sample-owner/hongguo-android"
     private val manifestUrl = "https://github.com/$repository/releases/latest/download/update.json"
     private val manifest = Json.stringify(mapOf(
-        "schemaVersion" to 1, "applicationId" to "com.hongguo.android", "versionCode" to 3,
+        "schemaVersion" to 1, "applicationId" to "com.x.hgvision", "versionCode" to 3,
         "versionName" to "0.3.0", "apkUrl" to "https://github.com/$repository/releases/download/v0.3.0/app.apk",
         "sha256" to "a".repeat(64), "sizeBytes" to 100, "minSdk" to 26, "notes" to "更新说明",
     )).toByteArray(Charsets.UTF_8)
@@ -165,7 +165,7 @@ class UpdateHttpTest {
     @Test fun invalidMetadataIsAFailedRouteEvenWhenHttpWasSuccessful() = runBlocking {
         val badBodies = listOf(
             manifest.toString(Charsets.UTF_8).replace("a".repeat(64), "g".repeat(64)).toByteArray(),
-            manifest.toString(Charsets.UTF_8).replace("com.hongguo.android", "com.example.other").toByteArray(),
+            manifest.toString(Charsets.UTF_8).replace("com.x.hgvision", "com.example.other").toByteArray(),
             manifest.toString(Charsets.UTF_8).replace("/$repository/releases/download/", "/other-owner/other-app/releases/download/").toByteArray(),
         )
         badBodies.forEach { bad ->

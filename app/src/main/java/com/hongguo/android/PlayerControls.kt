@@ -24,6 +24,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 internal val PlaybackSpeeds = listOf(.5f, .75f, 1f, 1.25f, 1.5f, 2f)
+internal val PlaybackQualities = listOf("auto", "480p", "720p", "1080p")
+
+internal fun playbackQualityLabel(quality: String): String =
+    if (quality == "auto") "自动" else quality.uppercase()
 
 internal fun playbackSpeedLabel(speed: Float): String = "${speed.toString().removeSuffix(".0")}×"
 

@@ -135,28 +135,28 @@ class DramaRepository {
         )
     }
 
-    suspend fun prepare(episode: Episode, allowFallback: Boolean = true,
+    suspend fun prepare(episode: Episode, quality: String = "auto", allowFallback: Boolean = true,
                         progress: (String, Long, Long) -> Unit): PreparedVideo {
         val context = currentCoroutineContext()
         var allocated: ProgressiveMedia.Session? = null
         var handedOff = false
         try {
             val result = runInterruptible(Dispatchers.IO) {
-                Stream.cachedPath(episode.id, "")?.let { return@runInterruptible PreparedVideo(episode.id, it) }
+                Stream.cachedPath(episode.id, quality)?.let { return@runInterruptible PreparedVideo(episode.id, it) }
                 var opening = true
                 val listener = object : Stream.Progress {
                     override fun update(stage: String, done: Long, total: Long) { progress(stage, done, total) }
                     override fun isCancelled(): Boolean = Thread.currentThread().isInterrupted || (opening && !context.isActive)
                 }
                 try {
-                    allocated = ProgressiveMedia.open(episode.id, "", listener)
+                    allocated = ProgressiveMedia.open(episode.id, quality, listener)
                     opening = false
                     PreparedVideo(episode.id, "", session = allocated)
                 } catch (cancelled: CancellationException) { throw cancelled }
                 catch (unsupported: ProgressiveMedia.UnsupportedException) {
                     if (!allowFallback) throw unsupported
                     progress("compatibility", 0, -1)
-                    val path = Stream.prepare(episode.id, "", object : Stream.Progress {
+                    val path = Stream.prepare(episode.id, quality, object : Stream.Progress {
                         override fun update(stage: String, done: Long, total: Long) { if (context.isActive) progress(stage, done, total) }
                         override fun isCancelled(): Boolean = !context.isActive || Thread.currentThread().isInterrupted
                     })

@@ -51,6 +51,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.hongguo.account.AccountSessionStatus
 import com.hongguo.account.AccountViewModel
@@ -58,7 +61,23 @@ import com.hongguo.account.AccountViewModel
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val tvMode = packageManager.hasSystemFeature(android.content.pm.PackageManager.FEATURE_LEANBACK) ||
+            (resources.configuration.uiMode and Configuration.UI_MODE_TYPE_MASK) == Configuration.UI_MODE_TYPE_TELEVISION
+        if (tvMode) {
+            requestedOrientation = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+            val preferences = getSharedPreferences(ThemePreferences.FILE, 0)
+            if (!preferences.contains("playback_quality")) {
+                preferences.edit().putString("playback_quality", "1080p").apply()
+            }
+        }
         applyThemeWindow(storedThemePalette())
+        if (tvMode) {
+            WindowCompat.setDecorFitsSystemWindows(window, false)
+            WindowInsetsControllerCompat(window, window.decorView).apply {
+                systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                hide(WindowInsetsCompat.Type.systemBars())
+            }
+        }
         setContent {
             val model: HongguoViewModel = viewModel()
             val state by model.state.collectAsStateWithLifecycle()
@@ -72,7 +91,8 @@ class MainActivity : ComponentActivity() {
             var detailPictureUnderBar by remember(state.selectedCard?.id) { mutableStateOf(true) }
             val statusBarOverPicture = state.selectedCard != null && layout != AppThemeStyle.WARM && detailPictureUnderBar
             // The player owns the system bars while open; the theme re-applies them when it closes.
-            HongguoTheme(layout, dark = dark, windowDark = dark || feedDark, statusBarOverPicture = statusBarOverPicture, applyToWindow = !state.playerOpen) {
+            HongguoTheme(layout, dark = dark || tvMode, windowDark = dark || feedDark || tvMode,
+                statusBarOverPicture = statusBarOverPicture, applyToWindow = !state.playerOpen) {
                 CompositionLocalProvider(LocalDetailPictureUnderBar provides { detailPictureUnderBar = it }) {
                 val pageStates = rememberSaveableStateHolder()
                 val accountModel: AccountViewModel = viewModel()
@@ -83,7 +103,7 @@ class MainActivity : ComponentActivity() {
                 LaunchedEffect(signedIn) { model.onAccountSession(signedIn) }
                 BackHandler(enabled = state.playerOpen || state.selectedCard != null || state.tab != AppTab.HOME) {
                     when {
-                        state.playerOpen -> model.closePlayer()
+                        state.playerOpen -> if (tvMode) model.closePlayerToLibrary() else model.closePlayer()
                         state.selectedCard != null -> model.closeDetail()
                         state.tab == AppTab.SEARCH -> model.closeSearch()
                         state.tab == AppTab.RANK -> model.closeRank()
@@ -104,17 +124,19 @@ class MainActivity : ComponentActivity() {
                     }) { playerShown ->
                 // False as soon as the player starts closing (or the page starts leaving), not when the fade ends.
                 val playerActive = transition.targetState == EnterExitState.Visible
-                if (playerShown) EpisodePlayerScreen(state, model, accountModel, active = playerActive)
-                else {
-                    val showNav = state.selectedCard == null && state.tab !in setOf(AppTab.SEARCH, AppTab.RANK, AppTab.ACCOUNT, AppTab.SETTINGS, AppTab.THEME_STYLE, AppTab.PLAY_HISTORY, AppTab.LOCAL_FAVORITES)
-                    // 悬浮玻璃: the bar floats as a liquid-glass capsule and the page runs underneath it.
-                    val floatingNav = showNav && state.navBarStyle == NavBarStyle.GLASS
+                if (playerShown) {
+                    if (tvMode) AppleTVPlayerScreen(state, model, accountModel, accountState, active = playerActive)
+                    else EpisodePlayerScreen(state, model, accountModel, active = playerActive)
+                } else {
+                    val showNav = tvMode || (state.selectedCard == null && state.tab !in setOf(AppTab.SEARCH, AppTab.RANK, AppTab.ACCOUNT, AppTab.SETTINGS, AppTab.THEME_STYLE, AppTab.PLAY_HISTORY, AppTab.LOCAL_FAVORITES))
+                    // Apple TV uses its own top navigation; the phone's floating bottom bar is disabled on TV.
+                    val floatingNav = !tvMode && showNav && state.navBarStyle == NavBarStyle.GLASS
                     val backdrop = rememberGlassBackdrop()
                     val navClearance = if (floatingNav) floatingNavClearance() else 0.dp
                     Scaffold(containerColor = Canvas,
                         snackbarHost = { SnackbarHost(snackbar, Modifier.testTag("app_snackbar")
                             .padding(bottom = if (floatingNav) 76.dp else 0.dp)) }, bottomBar = {
-                        if (showNav && !floatingNav) HongguoTheme(layout, dark = dark || feedDark, applyToWindow = false) {
+                        if (!tvMode && showNav && !floatingNav) HongguoTheme(layout, dark = dark || feedDark, applyToWindow = false) {
                             AppNavigation(state.tab, model::selectTab, style = layout)
                         }
                     }) { insets ->
@@ -148,16 +170,34 @@ class MainActivity : ComponentActivity() {
                                 lastDetail.key == key -> lastDetail.state
                                 else -> null
                             }
-                            if (detailState != null) when (layout) {
-                                AppThemeStyle.IMMERSIVE -> ImmersiveDetail(detailState, model, accountModel)
-                                AppThemeStyle.CARDS -> CardsDetail(detailState, model, accountModel)
-                                AppThemeStyle.WARM -> DetailScreen(detailState, model, accountModel)
+                            if (detailState != null) {
+                                if (tvMode) DetailScreen(detailState, model, accountModel)
+                                else when (layout) {
+                                    AppThemeStyle.IMMERSIVE -> ImmersiveDetail(detailState, model, accountModel)
+                                    AppThemeStyle.CARDS -> CardsDetail(detailState, model, accountModel)
+                                    AppThemeStyle.WARM -> DetailScreen(detailState, model, accountModel)
+                                }
                             }
                             else if (key.startsWith("detail_")) Unit
                             else {
                             val keyTab = AppTab.valueOf(key.removePrefix("tab_"))
                             val tabState = if (state.tab == keyTab) state else state.copy(tab = keyTab)
-                            when (keyTab) {
+                            if (tvMode) {
+                                AppleTVLibraryScreen(tabState, model,
+                                    accountModel = accountModel,
+                                    accountState = accountState,
+                                    updateState = updateState,
+                                    updateModel = updateModel,
+                                    accountName = if (accountState.sessionStatus == AccountSessionStatus.WEBSITE_ONLY)
+                                        accountState.websiteProfile?.nickname ?: "官网登录已保存" else accountState.profile?.nickname,
+                                    accountStatus = when (accountState.sessionStatus) {
+                                        AccountSessionStatus.WEBSITE_ONLY -> "官网已登录，手机云账号未接通"
+                                        AccountSessionStatus.LOGGED_IN -> "查看账号收藏、历史与预约"
+                                        AccountSessionStatus.NEEDS_VERIFICATION -> "已保存账号，等待重新验证"
+                                        else -> "登录后查看手机片单"
+                                    },
+                                    onAccount = { model.selectTab(AppTab.ACCOUNT) })
+                            } else when (keyTab) {
                                 AppTab.HOME -> when (layout) {
                                     AppThemeStyle.IMMERSIVE -> HongguoTheme(layout, dark = true, applyToWindow = false) { ImmersiveHome(state, model) }
                                     AppThemeStyle.CARDS -> CardsHome(state, model)

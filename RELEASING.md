@@ -2,12 +2,12 @@
 
 ## 当前发布约定
 
-- GitHub 仓库：[OOIUa/hongguo-android](https://github.com/OOIUa/hongguo-android)。
+- GitHub 仓库：[xycvip/HongGuoVision](https://github.com/xycvip/HongGuoVision)。
 - 首个支持在线更新的版本：`0.3.0`，`versionCode=3`，tag 为 `v0.3.0`。
 - 当前源码版本：`0.7.27`，`versionCode=38`，tag 为 `v0.7.27`；修复排行榜打不开（官网 2026-11-11 起把榜单数据改为内联 `_ROUTER_DATA`，issue #8）；收藏改读官方新版使用的 `bookshelf/video/list/v1/` 书架列表，旧 `video/info` 对新逻辑账号返回空数据导致「收藏读取失败」（issue #6），列表失败或为空时回退旧接口；预约被红果明确拒绝（如错误码 101144 风控）时如实提示未写入，不再只显示结果不确定（issue #7）。0.7.26 起取流先走带完整 x-argus / x-ladon 签名的单集接口 `/novel/player/video_model/v1/`。
 - 账号功能仍处于测试阶段。发行说明需简要说明官网验证、固定批次片单及可选进度上报的使用范围，实际登录与同步结果需用本人账号核对。
-- 应用 ID：`com.hongguo.android`；当前最低系统为 API 26。
-- 固定清单地址：`https://github.com/OOIUa/hongguo-android/releases/latest/download/update.json`。
+- 应用 ID：`com.x.hgvision`；当前最低系统为 API 26。
+- 固定清单地址：`https://github.com/xycvip/HongGuoVision/releases/latest/download/update.json`。
 - 自动检查开关开启时，每次重新启动应用在后台检查一次（0.7.1 起移除 24 小时间隔），有兼容新版才提醒；“我的”提供手动检查入口。下载与系统安装均需用户操作，更新窗口保留直连、两条加速线路及自动切换。
 
 0.1.x / 0.2.x 用户需手动覆盖安装一次支持在线更新的新版（0.3.0 及以后），才会获得后续在线更新入口。发布应使用既有相同签名，避免破坏现有安装与本机数据。
@@ -45,7 +45,7 @@
 | 字段 | 要求 |
 | --- | --- |
 | `schemaVersion` | 整数 `1` |
-| `applicationId` | `com.hongguo.android` |
+| `applicationId` | `com.x.hgvision` |
 | `versionCode` | 正整数，且高于客户端已安装版本才会提示更新 |
 | `versionName` | 与最终 APK 完全一致，仅用于显示 |
 | `apkUrl` | 本仓库 `releases/download/<tag>/<APK文件名>` 下的 HTTPS 地址，不带账号、query 或 fragment |
@@ -70,7 +70,7 @@ pwsh -File scripts/prepare-release.ps1
 - `update.json`：从实际 APK 提取的版本、大小、哈希和固定仓库下载地址。
 - `SHA256SUMS-<版本>.txt`：APK、源码 ZIP 和清单的 SHA-256。
 
-可通过 `-Apk`、`-OutputDirectory`、`-Repository` 显式调整输入和目标；本应用正式更新源保持 `OOIUa/hongguo-android`。后续发布还需更新脚本中的版本说明 `notes`，确认打包的源码 HEAD 与 APK 对应，再为该 HEAD 创建版本 tag。
+可通过 `-Apk`、`-OutputDirectory`、`-Repository` 显式调整输入和目标；本应用正式更新源保持 `xycvip/HongGuoVision`。后续发布还需更新脚本中的版本说明 `notes`，确认打包的源码 HEAD 与 APK 对应，再为该 HEAD 创建版本 tag。
 
 上传附件名必须与清单中的 `apkUrl` 完全一致。生成发布资产后，不要对 APK 再次签名或修改；如有变化，应重新执行检查及资产生成。
 

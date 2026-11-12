@@ -29,7 +29,7 @@ jobs:
       - name: 检出 TV 适配开发分支
         uses: actions/checkout@v4
         with:
-          ref: feature/tv-large-screen
+          ref: ${{ github.ref_name }}
           fetch-depth: 0
 
       - name: 配置 JDK 17
@@ -133,8 +133,12 @@ jobs:
         run: |
           set -euo pipefail
 
-          APK="app/build/outputs/apk/release/app-release.apk"
-          test -s "$APK"
+          APK="$(find app/build/outputs/apk/release -maxdepth 1 -type f -name '*.apk' ! -name '*unsigned*' -print -quit)"
+          if [[ -z "$APK" || ! -s "$APK" ]]; then
+            echo "::error::未找到有效的签名 APK。构建输出如下："
+            find app/build/outputs -maxdepth 5 -type f -printf '%p (%s bytes)\\n' | sort || true
+            exit 1
+          fi
 
           SDK_ROOT="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
           [[ -n "$SDK_ROOT" ]] || { echo "::error::找不到 Android SDK"; exit 1; }
