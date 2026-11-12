@@ -431,8 +431,7 @@ private fun AppleTVSection(
                     verticalAlignment = Alignment.Top,
                 ) {
                     items(cards, key = { it.id }) { card ->
-                        AppleTVPosterCard(card, subtitle = if (card.episodeCount > 0) "全 ${card.episodeCount} 集" else "",
-                            rankText = rankLabels[card.id].orEmpty(), onClick = { onOpen(card) })
+                        AppleTVPosterCard(card, rankText = rankLabels[card.id].orEmpty(), onClick = { onOpen(card) })
                     }
                 }
             }
