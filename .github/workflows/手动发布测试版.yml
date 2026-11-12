@@ -131,30 +131,102 @@ jobs:
         id: verify
         shell: bash
         run: |
-          set -euo pipefail
+          set -uo pipefail
 
           APK="app/build/outputs/apk/release/app-release.apk"
-          test -s "$APK"
+          ERRORS=()
+          EXPECTED_PACKAGE="com.x.hgvision"
+          EXPECTED_VERSION_CODE="${{ steps.version.outputs.version_code }}"
+          EXPECTED_VERSION_NAME="${{ steps.version.outputs.version_name }}"
+          EXPECTED_FINGERPRINT="$(tr -d '[:space:]:' < release-signing.sha256 | tr '[:upper:]' '[:lower:]')"
+
+          echo "========== APK 发布前校验 =========="
+          if [[ ! -s "$APK" ]]; then
+            echo "::error::APK 文件不存在或为空：$APK"
+            exit 1
+          fi
+          echo "APK 文件：$APK"
+          echo "APK 大小：$(stat -c '%s' "$APK") 字节"
 
           SDK_ROOT="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
-          [[ -n "$SDK_ROOT" ]] || { echo "::error::找不到 Android SDK"; exit 1; }
-          APKSIGNER="$(find "$SDK_ROOT/build-tools" -type f -name apksigner | sort -V | tail -n 1)"
-          AAPT="$(find "$SDK_ROOT/build-tools" -type f -name aapt | sort -V | tail -n 1)"
-          [[ -x "$APKSIGNER" && -x "$AAPT" ]] || { echo "::error::找不到 apksigner/aapt"; exit 1; }
+          APKSIGNER=""
+          AAPT=""
+          if [[ -n "$SDK_ROOT" ]]; then
+            APKSIGNER="$(find "$SDK_ROOT/build-tools" -type f -name apksigner 2>/dev/null | sort -V | tail -n 1)"
+            AAPT="$(find "$SDK_ROOT/build-tools" -type f -name aapt 2>/dev/null | sort -V | tail -n 1)"
+          fi
 
-          BADGING="$("$AAPT" dump badging "$APK")"
-          echo "$BADGING" | grep -F "package: name='com.x.hgvision' versionCode='${{ steps.version.outputs.version_code }}' versionName='${{ steps.version.outputs.version_name }}'"
-          echo "$BADGING" | grep -F "sdkVersion:'26'"
+          BADGING=""
+          if [[ -x "$AAPT" ]]; then
+            if BADGING="$("$AAPT" dump badging "$APK" 2>&1)"; then
+              PACKAGE_LINE="$(printf '%s\n' "$BADGING" | grep -m1 "^package:" || true)"
+              SDK_LINE="$(printf '%s\n' "$BADGING" | grep -m1 "^sdkVersion:" || true)"
+              echo "APK package 信息：${PACKAGE_LINE:-未找到}"
+              echo "APK 最低 SDK：${SDK_LINE:-未找到}"
 
-          EXPECTED_FINGERPRINT="$(tr -d '[:space:]' < release-signing.sha256 | tr '[:upper:]' '[:lower:]')"
-          ACTUAL_FINGERPRINT="$("$APKSIGNER" verify --print-certs "$APK" | sed -n 's/.*SHA-256 digest: //p' | head -n 1 | tr -d ':' | tr '[:upper:]' '[:lower:]')"
-          [[ -n "$EXPECTED_FINGERPRINT" && "$ACTUAL_FINGERPRINT" == "$EXPECTED_FINGERPRINT" ]] || {
-            echo "::error::签名证书指纹不匹配，停止发布。"
-            echo "期望：$EXPECTED_FINGERPRINT"
-            echo "实际：$ACTUAL_FINGERPRINT"
+              if [[ "$PACKAGE_LINE" == *"name='$EXPECTED_PACKAGE'"* &&
+                    "$PACKAGE_LINE" == *"versionCode='$EXPECTED_VERSION_CODE'"* &&
+                    "$PACKAGE_LINE" == *"versionName='$EXPECTED_VERSION_NAME'"* ]]; then
+                echo "结果：包名、versionCode、versionName 均匹配。"
+              else
+                echo "::error::APK 包名或版本信息不匹配。"
+                ERRORS+=("包名/版本校验失败")
+              fi
+
+              if [[ "$SDK_LINE" == "sdkVersion:'26'" ]]; then
+                echo "结果：最低 SDK 为 26（Android 8.0）。"
+              else
+                echo "::error::最低 SDK 不匹配，期望 26，实际：${SDK_LINE:-未找到}"
+                ERRORS+=("最低 SDK 校验失败")
+              fi
+            else
+              echo "::error::aapt 无法读取 APK 信息：$BADGING"
+              ERRORS+=("aapt 读取 APK 失败")
+            fi
+          else
+            echo "::error::找不到可执行的 aapt，无法校验包名/版本/最低 SDK。"
+            ERRORS+=("aapt 不可用")
+          fi
+
+          ACTUAL_FINGERPRINT=""
+          if [[ -x "$APKSIGNER" ]]; then
+            if SIGNER_OUTPUT="$("$APKSIGNER" verify --print-certs "$APK" 2>&1)"; then
+              echo "apksigner 验签：通过"
+              ACTUAL_FINGERPRINT="$(printf '%s\n' "$SIGNER_OUTPUT" | sed -nE 's/.*certificate SHA-256 digest: ([0-9A-Fa-f:]+).*/\1/p' | head -n 1 | tr -d ':' | tr '[:upper:]' '[:lower:]')"
+              if [[ -n "$ACTUAL_FINGERPRINT" ]]; then
+                echo "APK 实际签名证书 SHA-256：$ACTUAL_FINGERPRINT"
+              else
+                echo "::error::验签成功，但未能从 apksigner 输出提取 SHA-256 证书指纹。"
+                echo "$SIGNER_OUTPUT"
+                ERRORS+=("无法提取实际签名指纹")
+              fi
+            else
+              echo "::error::apksigner 验签失败："
+              echo "$SIGNER_OUTPUT"
+              ERRORS+=("APK 签名验证失败")
+            fi
+          else
+            echo "::error::找不到可执行的 apksigner，无法校验签名。"
+            ERRORS+=("apksigner 不可用")
+          fi
+
+          echo "仓库固定签名证书 SHA-256：$EXPECTED_FINGERPRINT"
+          if [[ "$EXPECTED_FINGERPRINT" =~ ^[0-9a-f]{64}$ ]] &&
+             [[ "$ACTUAL_FINGERPRINT" == "$EXPECTED_FINGERPRINT" ]]; then
+            echo "结果：签名证书指纹与仓库固定指纹完全一致。"
+          else
+            echo "::error::签名证书指纹与仓库固定指纹不一致。"
+            ERRORS+=("签名证书指纹不匹配")
+          fi
+
+          if (( ${#ERRORS[@]} > 0 )); then
+            echo "========== 校验失败汇总 =========="
+            printf ' - %s\n' "${ERRORS[@]}"
+            echo "::error::APK 发布前校验未通过，已阻止发布；固定签名指纹校验未被关闭或放宽。"
             exit 1
-          }
+          fi
 
+          echo "========== 所有校验通过 =========="
           APK_NAME="HongGuoVision-${{ steps.version.outputs.version_name }}-${{ steps.version.outputs.version_code }}.apk"
           cp "$APK" "$APK_NAME"
           sha256sum "$APK_NAME" > "SHA256SUMS-${{ steps.version.outputs.version_code }}.txt"
