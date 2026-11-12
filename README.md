@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src="docs/images/logo.png" width="112" alt="红果独立版 logo">
+<img src="docs/images/logo.png" width="112" alt="红果影视 logo">
 
-# 红果独立版
+# 红果影视
 
 **在手机上发现好剧，随时接着看。**
 
