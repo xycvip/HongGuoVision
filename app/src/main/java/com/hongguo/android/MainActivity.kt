@@ -61,7 +61,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val tvMode = packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK) ||
-            resources.configuration.uiMode and Configuration.UI_MODE_TYPE_MASK == Configuration.UI_MODE_TYPE_TELEVISION
+            (resources.configuration.uiMode and Configuration.UI_MODE_TYPE_MASK) == Configuration.UI_MODE_TYPE_TELEVISION
         if (tvMode) requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
         applyThemeWindow(storedThemePalette())
         setContent {
