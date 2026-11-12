@@ -34,7 +34,7 @@ internal fun AccountConfirmationDialogs(
                     else "将退出${accountLabel ?: "本机保存的红果账号"}并停止账号同步。本机收藏和观看记录保留。", fontSize = 14.sp)
             },
             confirmButton = {
-                TextButton(onClick = onLogout, modifier = Modifier.testTag("account_logout_confirm")) {
+                TextButton(onClick = onLogout, modifier = Modifier.tvFocusVisual().testTag("account_logout_confirm")) {
                     Text(if (localReset) "清除登录态" else "退出账号")
                 }
             },
@@ -48,7 +48,7 @@ internal fun AccountConfirmationDialogs(
             title = { Text("取消账号收藏？") },
             text = { Text("将从当前红果账号移除《${entry.card.title}》。本机收藏保留。", fontSize = 14.sp) },
             confirmButton = {
-                TextButton(onClick = { onRemove(entry) }, modifier = Modifier.testTag("account_remove_favorite_confirm")) {
+                TextButton(onClick = { onRemove(entry) }, modifier = Modifier.tvFocusVisual().testTag("account_remove_favorite_confirm")) {
                     Text("取消收藏")
                 }
             },
