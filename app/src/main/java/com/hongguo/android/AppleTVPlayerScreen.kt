@@ -57,6 +57,24 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.hongguo.account.AccountSessionStatus
 import com.hongguo.account.AccountState
 
+/** Short transition while the selected work and first stream are being prepared. */
+@Composable
+internal fun AppleTVPreparingScreen(state: HongguoUiState, model: HongguoViewModel) {
+    Box(Modifier.fillMaxSize().background(Color.Black), contentAlignment = Alignment.Center) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(appleTVDp(16f))) {
+            if (state.detailError == null) {
+                CircularProgressIndicator(color = Color.White, modifier = Modifier.width(appleTVDp(44f)).height(appleTVDp(44f)))
+                Text(state.preparationStage.ifBlank { if (state.loadingDetail) "正在载入剧集…" else "正在准备播放…" },
+                    color = Color.White, fontSize = appleTVSp(18f))
+            } else {
+                Text(state.selectedCard?.title.orEmpty(), color = Color.White, fontSize = appleTVSp(24f), fontWeight = FontWeight.Bold)
+                Text(state.detailError.orEmpty(), color = Color.White.copy(alpha = .72f), fontSize = appleTVSp(16f))
+                AppleTVControl("重试", onClick = model::retryDetails)
+            }
+        }
+    }
+}
+
 /** TV player presentation: full-bleed video, transport controls and the four Apple TV info tabs. */
 @Composable
 internal fun AppleTVPlayerScreen(
