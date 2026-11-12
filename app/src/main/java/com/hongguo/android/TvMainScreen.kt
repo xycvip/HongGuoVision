@@ -262,9 +262,8 @@ private fun TvMainScreen(
                 state.tab == AppTab.RANK -> TvRankContent(state, model)
                 state.tab == AppTab.FAVORITES || state.tab == AppTab.HISTORY -> TvLibraryContent(state, model)
                 state.tab == AppTab.SEARCH -> TvSearchContent(state, model)
-                state.tab == AppTab.MINE -> MyScreen(state, model, updateState, updateModel,
-                    accountName = accountName, accountAvatar = accountAvatar, accountStatus = accountStatus,
-                    style = AppThemeStyle.IMMERSIVE)
+                state.tab == AppTab.MINE -> TvMineContent(state, model, updateState, updateModel,
+                    accountName = accountName, accountStatus = accountStatus)
                 state.tab == AppTab.ACCOUNT -> AccountScreen(accountModel, onBack = model::closeAccount,
                     onOpenLibrary = model::openLibrary)
                 state.tab == AppTab.SETTINGS -> SystemSettingsScreen(state, model, updateState, updateModel,
@@ -647,6 +646,63 @@ private fun TvSearchContent(state: HongguoUiState, model: HongguoViewModel) {
                         onClick = model::loadMore, enabled = !state.loadingMore)
                 }
             }
+        }
+    }
+}
+
+
+@Composable
+private fun TvMineContent(
+    state: HongguoUiState,
+    model: HongguoViewModel,
+    updateState: UpdateUiState,
+    updateModel: UpdateViewModel,
+    accountName: String?,
+    accountStatus: String,
+) {
+    Column(Modifier.fillMaxSize().padding(end = 18.dp).testTag("tv_mine"),
+        verticalArrangement = Arrangement.spacedBy(24.dp)) {
+        Text("我的", color = TvText, fontSize = 30.sp, fontWeight = FontWeight.Black)
+        Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(TvPanel).padding(24.dp),
+            verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(24.dp)) {
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(9.dp)) {
+                Text(accountName ?: "登录红果账号", color = TvText, fontSize = 24.sp, fontWeight = FontWeight.Bold,
+                    maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(accountStatus, color = TvMuted, fontSize = 15.sp)
+                Text("账号、云片单与隐私管理", color = TvMuted, fontSize = 13.sp)
+            }
+            TvAction("账号与隐私", onClick = { model.selectTab(AppTab.ACCOUNT) })
+        }
+        Text("本机片单", color = TvText, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            TvMineTile("本机收藏", state.favorites.size.toString(), "打开收藏") {
+                model.selectTab(AppTab.LOCAL_FAVORITES)
+            }
+            TvMineTile("本机看过", state.history.size.toString(), "观看记录") {
+                model.openPlayHistory(local = true)
+            }
+        }
+        Text("应用管理", color = TvText, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            TvAction("系统设置", onClick = { model.selectTab(AppTab.SETTINGS) })
+            TvAction("主题样式", onClick = { model.selectTab(AppTab.THEME_STYLE) }, secondary = true)
+            TvAction(if (updateState.checking) "正在检查…" else "检查更新",
+                onClick = updateModel::checkForUpdates, secondary = true, enabled = !updateState.checking)
+        }
+        Text("红果独立版  ·  ${BuildConfig.VERSION_NAME}", color = TvMuted, fontSize = 12.sp)
+    }
+}
+
+@Composable
+private fun TvMineTile(title: String, count: String, action: String, onClick: () -> Unit) {
+    var focused by remember { mutableStateOf(false) }
+    Surface(onClick = onClick, shape = RoundedCornerShape(18.dp), color = if (focused) TvPanelFocused else TvPanel,
+        border = if (focused) BorderStroke(2.dp, TvAccent) else null,
+        modifier = Modifier.weight(1f).height(130.dp).onFocusChanged { focused = it.isFocused }) {
+        Column(Modifier.fillMaxSize().padding(18.dp), verticalArrangement = Arrangement.spacedBy(7.dp)) {
+            Text(title, color = TvMuted, fontSize = 15.sp)
+            Text(count, color = TvText, fontSize = 28.sp, fontWeight = FontWeight.Black)
+            Text(action, color = if (focused) TvAccent else TvMuted, fontSize = 12.sp)
         }
     }
 }
