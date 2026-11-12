@@ -422,7 +422,7 @@ private fun TvPosterRail(
         Text(title, color = TvText, fontSize = 21.sp, fontWeight = FontWeight.Bold)
         LazyRow(horizontalArrangement = Arrangement.spacedBy(18.dp),
             contentPadding = PaddingValues(vertical = 8.dp, horizontal = 4.dp)) {
-            items(cards, key = { it.id }) { card -> TvPosterCard(card, subtitle(card)) { onClick(card) } }
+            items(cards, key = { it.id }) { card -> TvPosterCard(card, subtitle(card), onClick = { onClick(card) }) }
         }
     }
 }
@@ -533,9 +533,8 @@ private fun TvLibraryContent(state: HongguoUiState, model: HongguoViewModel, his
                 verticalArrangement = Arrangement.spacedBy(18.dp)) {
                 items(entries.size) { index ->
                     val entry = entries[index]
-                    TvPosterCard(entry.card, if (history) "看到第 " + entry.episodeIndex.coerceAtLeast(1) + " 集" else "已收藏") {
-                        model.openLibrary(entry)
-                    }
+                    TvPosterCard(entry.card, if (history) "看到第 " + entry.episodeIndex.coerceAtLeast(1) + " 集" else "已收藏",
+                        onClick = { model.openLibrary(entry) })
                 }
             }
         }
@@ -679,10 +678,11 @@ private fun TvSearchContent(state: HongguoUiState, model: HongguoViewModel) {
                 contentPadding = PaddingValues(8.dp), horizontalArrangement = Arrangement.spacedBy(18.dp),
                 verticalArrangement = Arrangement.spacedBy(18.dp)) {
                 itemsIndexed(state.results, key = { _, card -> card.id }) { _, card ->
-                    TvPosterCard(card, if (card.episodeCount > 0) "全 ${card.episodeCount} 集" else "短剧") {
-                        keyboard?.hide()
-                        model.openDrama(card)
-                    }
+                    TvPosterCard(card, if (card.episodeCount > 0) "全 ${card.episodeCount} 集" else "短剧",
+                        onClick = {
+                            keyboard?.hide()
+                            model.openDrama(card)
+                        })
                 }
                 if (state.searchError != null) item { TvAction("重试", onClick = model::loadMore) }
                 else if (state.hasMore) item {
