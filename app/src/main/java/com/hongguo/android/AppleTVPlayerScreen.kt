@@ -306,7 +306,7 @@ internal fun AppleTVPlayerScreen(
                     "相关作品" -> {
                         if (state.related.isEmpty()) Text("暂无相关作品", color = Color.White.copy(alpha = .7f))
                         else LazyRow(Modifier.focusGroup(), horizontalArrangement = Arrangement.spacedBy(appleTVDp(16f))) {
-                            items(state.related.take(10), key = { it.series.id }) { work ->
+                            items(state.related, key = { it.series.id }) { work ->
                                 val card = DramaCard(work.series.id, work.series.title, work.series.cover,
                                     work.episodeCount, work.series.description)
                                 var focused by remember(work.series.id) { mutableStateOf(false) }
