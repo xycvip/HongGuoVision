@@ -209,22 +209,18 @@ private fun AppleTVDiscover(state: HongguoUiState, model: HongguoViewModel) {
                     if (state.browseDraft.genre != genre) model.changeGenre(genre)
                 }
             }
-            state.filterGroups.firstOrNull { it.key == "theme" }?.let { topics ->
-                if (topics.options.isNotEmpty()) {
-                    Text("题材", color = AppleTVColors.secondary, fontSize = appleTVSp(14f))
-                    AppleTVControl("全部", selected = state.browseDraft.options[topics.key].isNullOrBlank()) {
-                        if (!state.browseDraft.options[topics.key].isNullOrBlank()) {
-                            model.selectFilter(topics.key, "")
-                            model.applyBrowse()
-                        }
-                    }
-                    topics.options.forEach { option ->
-                        AppleTVControl(option.label, selected = state.browseDraft.options[topics.key] == option.id) {
-                            if (state.browseDraft.options[topics.key] != option.id) {
-                                model.selectFilter(topics.key, option.id)
-                                model.applyBrowse()
-                            }
-                        }
+            Text("题材", color = AppleTVColors.secondary, fontSize = appleTVSp(14f))
+            AppleTVControl("全部", selected = state.browseDraft.options["theme"].isNullOrBlank()) {
+                if (!state.browseDraft.options["theme"].isNullOrBlank()) {
+                    model.selectFilter("theme", "")
+                    model.applyBrowse()
+                }
+            }
+            state.filterGroups.firstOrNull { it.key == "theme" }?.options?.forEach { option ->
+                AppleTVControl(option.label, selected = state.browseDraft.options["theme"] == option.id) {
+                    if (state.browseDraft.options["theme"] != option.id) {
+                        model.selectFilter("theme", option.id)
+                        model.applyBrowse()
                     }
                 }
             }
