@@ -27,7 +27,6 @@ import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.SmartDisplay
-import androidx.compose.material.icons.outlined.PlayCircleOutline
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.Schedule
@@ -319,6 +318,11 @@ private fun AppleTVMine(
             status = accountState.message?.takeIf { it.isNotBlank() }
                 ?: if (cloud) accountStatus else "未登录，展示本机片单；登录后同步账号数据",
             emptyText = when (category) { "历史" -> "暂无观看记录"; "预约" -> "暂无已上线预约"; else -> "暂无收藏" },
+            emptyIcon = when (category) {
+                "历史" -> Icons.Outlined.History
+                "预约" -> Icons.Outlined.Schedule
+                else -> Icons.Outlined.StarBorder
+            },
             filters = {
                 AppleTVControl("收藏", selected = category == "收藏") { category = "收藏" }
                 AppleTVControl("历史", selected = category == "历史") { category = "历史" }
