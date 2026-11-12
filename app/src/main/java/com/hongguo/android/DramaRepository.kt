@@ -95,6 +95,7 @@ class DramaRepository {
                 cover = Json.optStr(item["cover"], ""),
                 episodeCount = Json.optInt(item["episode_cnt"], 0),
                 summary = Json.optStr(item["abstract"], ""),
+                badge = Json.optStr(item["badge"], ""),
             )
         }
         DramaPage(cards, page.hasMore, page.nextSkip)
