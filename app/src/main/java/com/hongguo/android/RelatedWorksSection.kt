@@ -30,7 +30,7 @@ import com.hongguo.account.AccountSessionStatus
 import com.hongguo.account.AccountViewModel
 import com.hongguo.account.protocol.RelatedWork
 
-internal fun RelatedWork.toCard() = DramaCard(series.id, series.title, series.cover, episodeCount, series.description)
+internal fun RelatedWork.toCard() = DramaCard(series.id, series.title, series.cover, episodeCount, series.description, series.badge)
 
 /** Other seasons and same-IP works. Tapping an on-line work opens it; an upcoming one can be reserved. */
 @Composable
