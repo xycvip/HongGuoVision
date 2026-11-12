@@ -181,9 +181,10 @@ private fun AppleTVHome(state: HongguoUiState, model: HongguoViewModel) {
                     if (state.homeFeed != feed) model.selectHomeFeed(feed)
                 }
             }
-            AppleTVControl("换一批", icon = Icons.Outlined.Refresh, paddingH = 16.dp, paddingV = 8.dp) { model.refreshHome() }
+            AppleTVControl("换一批", icon = Icons.Outlined.Refresh, paddingH = 16.dp, paddingV = 8.dp,
+                enabled = !state.home.loading && !state.home.loadingMore) { model.refreshHome() }
             AppleTVControl("开始刷剧", icon = Icons.Outlined.PlayArrow, paddingH = 16.dp, paddingV = 8.dp,
-                enabled = !state.home.loading) { model.startHomeTrial() }
+                enabled = !state.home.loading && !state.home.loadingMore) { model.startHomeTrial() }
         },
         cards = state.home.items,
         loading = state.home.loading && state.home.items.isEmpty(),
