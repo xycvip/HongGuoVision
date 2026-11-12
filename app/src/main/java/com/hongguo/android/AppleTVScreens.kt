@@ -33,6 +33,7 @@ import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material.icons.outlined.VideoLibrary
+import androidx.compose.material.icons.outlined.QrCode2
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -84,7 +85,6 @@ internal fun AppleTVLibraryScreen(
     accountModel: com.hongguo.account.AccountViewModel,
     updateState: UpdateUiState,
     updateModel: UpdateViewModel,
-    onAccount: () -> Unit = { model.selectTab(AppTab.ACCOUNT) },
 ) {
     val homeFocus = androidx.compose.runtime.remember { FocusRequester() }
     val findFocus = androidx.compose.runtime.remember { FocusRequester() }
@@ -138,7 +138,7 @@ internal fun AppleTVLibraryScreen(
             AppTab.CATEGORY -> AppleTVDiscover(state, model)
             AppTab.RANK -> AppleTVRank(state, model)
             AppTab.SEARCH -> AppleTVSearch(state, model)
-            AppTab.MINE, AppTab.FAVORITES, AppTab.HISTORY -> AppleTVMine(state, model, accountName, accountStatus, accountState, accountModel, onAccount)
+            AppTab.MINE, AppTab.FAVORITES, AppTab.HISTORY -> AppleTVMine(state, model, accountName, accountStatus, accountState, accountModel)
             AppTab.ACCOUNT -> AccountScreen(accountModel, onBack = model::closeAccount, onOpenLibrary = model::openLibrary)
             AppTab.SETTINGS -> SystemSettingsScreen(state, model, updateState, updateModel,
                 onTheme = { model.selectTab(AppTab.THEME_STYLE) }, onBack = model::closeSettings)
@@ -287,7 +287,6 @@ private fun AppleTVMine(
     accountStatus: String,
     accountState: AccountState,
     accountModel: com.hongguo.account.AccountViewModel,
-    onAccount: () -> Unit,
 ) {
     var category by rememberSaveable { mutableStateOf("收藏") }
     val cloud = accountState.sessionStatus == AccountSessionStatus.LOGGED_IN
@@ -315,17 +314,20 @@ private fun AppleTVMine(
         )) {
         AppleTVSection(
             canvasHeight = appleTVLibraryCanvasHeight(),
-            status = accountState.message?.takeIf { it.isNotBlank() } ?: accountStatus,
+            status = accountState.message?.takeIf { it.isNotBlank() }
+                ?: if (cloud) accountStatus else "未登录，展示本机片单；登录后同步账号数据",
             emptyText = when (category) { "历史" -> "暂无观看记录"; "预约" -> "暂无已上线预约"; else -> "暂无收藏" },
             filters = {
                 AppleTVControl("收藏", selected = category == "收藏") { category = "收藏" }
                 AppleTVControl("历史", selected = category == "历史") { category = "历史" }
                 AppleTVControl("预约", selected = category == "预约") { category = "预约" }
                 if (cloud) {
-                    AppleTVControl(accountName ?: "红果用户", modifier = Modifier.focusRequester(accountFocus), onClick = onAccount)
+                    Text(accountName ?: "红果用户", color = Color.White, fontSize = appleTVSp(16f), fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.focusRequester(accountFocus))
                     AppleTVControl("登出", enabled = !accountState.busy, onClick = accountModel::logout)
                 } else {
-                    AppleTVControl("扫码登录", enabled = !accountState.busy, modifier = Modifier.focusRequester(loginFocus)) {
+                    AppleTVControl("扫码登录", icon = Icons.Outlined.QrCode2, enabled = !accountState.busy,
+                        modifier = Modifier.focusRequester(loginFocus)) {
                         accountModel.startQrLogin()
                     }
                 }
