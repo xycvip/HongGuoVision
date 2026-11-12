@@ -652,7 +652,7 @@ private fun EpisodeChooser(detail: DramaDetail, selected: Int, modifier: Modifie
         Text(detail.title, fontSize = 20.sp, fontWeight = FontWeight.Bold, maxLines = 2, overflow = TextOverflow.Ellipsis)
         Text("共 ${detail.episodes.size} 集 · 当前第 ${detail.episodes[selected].index} 集", color = Color.White.copy(alpha = .65f), fontSize = 12.sp)
         val grid = rememberLazyGridState(initialFirstVisibleItemIndex = (selected / 5) * 5)
-        LazyVerticalGrid(columns = GridCells.Fixed(5), state = grid,
+        LazyVerticalGrid(columns = if (LocalTvMode.current) GridCells.Adaptive(112.dp) else GridCells.Fixed(5), state = grid,
             modifier = (if (maxGridHeight != null) Modifier.heightIn(max = maxGridHeight) else Modifier.weight(1f, fill = false))
                 .fillMaxWidth().testTag("player_episode_list"),
             horizontalArrangement = Arrangement.spacedBy(9.dp), verticalArrangement = Arrangement.spacedBy(9.dp)) {
