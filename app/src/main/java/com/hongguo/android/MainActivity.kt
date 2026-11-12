@@ -58,6 +58,11 @@ import com.hongguo.account.AccountViewModel
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (isTelevisionDevice()) {
+            startActivity(android.content.Intent(this, TvActivity::class.java))
+            finish()
+            return
+        }
         applyThemeWindow(storedThemePalette())
         setContent {
             val model: HongguoViewModel = viewModel()
