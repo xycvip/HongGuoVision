@@ -69,14 +69,14 @@ internal object AppleTVLayout {
 internal object AppleTVColors {
     val background = Color.Black
     val normalFill = Color.White.copy(alpha = .08f)
-    val normalText = Color(0xFFB8B8B8)
+    val normalText = Color.White.copy(alpha = .6f)
     val focusedFill = Color.White.copy(alpha = .20f)
     val focusedText = Color.White
     val selectedFill = Color.White.copy(alpha = .88f)
     val selectedText = Color(0xFF171717)
     val accent = Color(0xFF0A84FF)
     val focusShadow = Color.Black.copy(alpha = .5f)
-    val secondary = Color(0xFF969696)
+    val secondary = Color.White.copy(alpha = .6f)
 }
 
 @Composable
@@ -110,11 +110,11 @@ internal fun AppleTVControl(
         modifier
             .onFocusChanged { focused = it.isFocused }
             .graphicsLayerScale(scale)
+            .shadow(if (focused) appleTVDp(12f) else 0.dp, CircleShape,
+                ambientColor = AppleTVColors.focusShadow, spotColor = AppleTVColors.focusShadow)
             .clip(CircleShape)
             .background(fill)
             .then(if (focused) Modifier.border(appleTVDp(2f), AppleTVColors.accent, CircleShape) else Modifier)
-            .shadow(if (focused) appleTVDp(12f) else 0.dp, CircleShape,
-                ambientColor = AppleTVColors.focusShadow, spotColor = AppleTVColors.focusShadow)
             .alpha(if (enabled) 1f else .4f)
             .clickable(enabled = enabled, onClick = onClick)
             .focusable(enabled = enabled)
