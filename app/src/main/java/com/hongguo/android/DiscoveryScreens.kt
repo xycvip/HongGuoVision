@@ -287,7 +287,7 @@ internal fun CategoryScreen(state: HongguoUiState, model: HongguoViewModel) {
 @Composable
 internal fun CatalogSearchEntry(placeholder: String, tag: String, onClick: () -> Unit) {
     Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(28.dp)).background(Cream)
-        .clickable(role = Role.Button, onClick = onClick).heightIn(min = 38.dp)
+        .tvFocusVisual().clickable(role = Role.Button, onClick = onClick).heightIn(min = 38.dp)
         .testTag(tag).padding(horizontal = 16.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
         Icon(Icons.Outlined.Search, null, tint = Muted, modifier = Modifier.size(24.dp))
