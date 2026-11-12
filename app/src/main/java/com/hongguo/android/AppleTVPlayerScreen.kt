@@ -4,6 +4,7 @@ import android.view.View
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
@@ -33,6 +34,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.focusGroup
@@ -41,9 +43,11 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -276,8 +280,17 @@ internal fun AppleTVPlayerScreen(
                             items(state.related.take(10), key = { it.series.id }) { work ->
                                 val card = DramaCard(work.series.id, work.series.title, work.series.cover,
                                     work.episodeCount, work.series.description)
+                                var focused by remember(work.series.id) { mutableStateOf(false) }
                                 Column(
                                     Modifier.width(appleTVDp(120f))
+                                        .onFocusChanged { focused = it.isFocused }
+                                        .graphicsLayer { scaleX = if (focused) 1.05f else 1f; scaleY = if (focused) 1.05f else 1f }
+                                        .shadow(if (focused) appleTVDp(12f) else 0.dp, RoundedCornerShape(appleTVDp(10f)),
+                                            ambientColor = AppleTVColors.focusShadow, spotColor = AppleTVColors.focusShadow)
+                                        .clip(RoundedCornerShape(appleTVDp(10f)))
+                                        .background(if (focused) AppleTVColors.focusedFill else Color.Transparent)
+                                        .then(if (focused) Modifier.border(appleTVDp(2f), AppleTVColors.accent,
+                                            RoundedCornerShape(appleTVDp(10f))) else Modifier)
                                         .alpha(if (!work.upcoming || accountState.sessionStatus == AccountSessionStatus.LOGGED_IN) 1f else .4f)
                                         .clickable(enabled = !work.upcoming || accountState.sessionStatus == AccountSessionStatus.LOGGED_IN) {
                                             if (work.upcoming) accountModel.reserve(work)
