@@ -148,7 +148,7 @@ internal fun AppNavigation(selected: AppTab, onSelect: (AppTab) -> Unit, modifie
                     val mark = animateFloatAsState(if (isSelected) 1f else 0f,
                         spring(dampingRatio = .7f, stiffness = Spring.StiffnessMediumLow), label = "nav_mark_${tab.name}")
                     Column(Modifier.weight(1f).heightIn(min = 64.dp)
-                        .selectable(selected = active == tab, role = Role.Tab, onClick = { select(tab) }).testTag("nav_${tab.name.lowercase(Locale.ROOT)}")
+                        .tvFocusVisual().selectable(selected = active == tab, role = Role.Tab, onClick = { select(tab) }).testTag("nav_${tab.name.lowercase(Locale.ROOT)}")
                         .padding(horizontal = 4.dp, vertical = 7.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center) {
