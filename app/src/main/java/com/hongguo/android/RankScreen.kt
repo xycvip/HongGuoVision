@@ -41,16 +41,16 @@ import com.hongguo.account.protocol.RankEntry
 /** Header button that opens the full boards. */
 @Composable
 internal fun RankEntryButton(model: HongguoViewModel, tag: String) {
-    IconButton(onClick = model::openRank, modifier = Modifier.testTag(tag)) { Icon(Icons.Outlined.Leaderboard, "榜单", tint = Ink) }
+    IconButton(onClick = model::openRank, modifier = Modifier.tvFocusVisual().testTag(tag)) { Icon(Icons.Outlined.Leaderboard, "榜单", tint = Ink) }
 }
 
 /** The website's public boards: 综合, 真人剧, 漫剧 and AI 剧. */
 @Composable
 internal fun RankScreen(state: HongguoUiState, model: HongguoViewModel) {
     BackHandler(enabled = LocalPageActive.current, onBack = model::closeRank)
-    Column(Modifier.fillMaxSize().testTag("rank_screen")) {
+    Column(Modifier.fillMaxSize().tvFocusVisual().testTag("rank_screen")) {
         Row(Modifier.fillMaxWidth().padding(start = 8.dp, end = 20.dp, top = 2.dp, bottom = 6.dp), verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = model::closeRank, modifier = Modifier.testTag("rank_back")) {
+            IconButton(onClick = model::closeRank, modifier = Modifier.tvFocusVisual().testTag("rank_back")) {
                 Icon(Icons.AutoMirrored.Outlined.ArrowBack, "返回", tint = Ink)
             }
             Text("榜单", color = Ink, fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
@@ -58,11 +58,11 @@ internal fun RankScreen(state: HongguoUiState, model: HongguoViewModel) {
         TabRow(selectedTabIndex = state.rankBoard.ordinal, containerColor = Canvas, contentColor = AccentInk) {
             RankBoard.entries.forEach { board ->
                 Tab(selected = state.rankBoard == board, onClick = { model.selectRankBoard(board) },
-                    modifier = Modifier.testTag("rank_board_${board.route}"), selectedContentColor = AccentInk, unselectedContentColor = Muted,
+                    modifier = Modifier.tvFocusVisual().testTag("rank_board_${board.route}"), selectedContentColor = AccentInk, unselectedContentColor = Muted,
                     text = { Text(board.label, fontSize = 15.sp, maxLines = 1) })
             }
         }
-        LazyColumn(Modifier.fillMaxWidth().weight(1f).testTag("rank_list"), contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp).plusNavClearance(),
+        LazyColumn(Modifier.fillMaxWidth().weight(1f).tvFocusVisual().testTag("rank_list"), contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp).plusNavClearance(),
             verticalArrangement = Arrangement.spacedBy(12.dp)) {
             items(state.rankEntries, key = { it.series.id }) { entry -> RankRow(entry) { model.openDrama(entry.toCard()) } }
             when {
@@ -80,7 +80,7 @@ internal fun RankEntry.toCard() = DramaCard(series.id, series.title, series.cove
 
 @Composable
 private fun RankRow(entry: RankEntry, onOpen: () -> Unit) {
-    Row(Modifier.fillMaxWidth().clickable(role = Role.Button, onClick = onOpen).heightIn(min = 112.dp).testTag("rank_${entry.series.id}"),
+    Row(Modifier.fillMaxWidth().clickable(role = Role.Button, onClick = onOpen).heightIn(min = 112.dp).tvFocusVisual().testTag("rank_${entry.series.id}"),
         horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
         Text(if (entry.rank > 0) entry.rank.toString() else "–", Modifier.width(30.dp), color = if (entry.rank in 1..3) AccentInk else Muted,
             fontSize = 18.sp, fontWeight = FontWeight.Bold, maxLines = 1)
