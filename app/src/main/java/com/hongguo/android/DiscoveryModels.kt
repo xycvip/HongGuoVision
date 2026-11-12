@@ -73,7 +73,7 @@ internal object DiscoveryMapper {
         DramaCard(
             id, Json.optStr(row["title"], "").ifBlank { "未命名短剧" },
             Json.optStr(row["cover"], ""), Json.optInt(row["episode_cnt"], 0),
-            Json.optStr(row["abstract"], ""),
+            Json.optStr(row["abstract"], ""), Json.optStr(row["badge"], ""),
         )
     }.distinctBy { it.id }
 
