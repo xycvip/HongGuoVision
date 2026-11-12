@@ -1,4 +1,4 @@
-package com.x.hgvision
+package com.hongguo.android
 
 import com.hongguo.api.util.Json
 import kotlinx.coroutines.runBlocking
