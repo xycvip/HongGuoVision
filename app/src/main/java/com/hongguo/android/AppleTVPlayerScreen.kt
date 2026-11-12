@@ -282,7 +282,7 @@ internal fun AppleTVPlayerScreen(
                                 AppleTVStepButton(androidx.compose.material.icons.Icons.Outlined.SkipPrevious) {
                                     targetEpisode = (selectedEpisode - 1).coerceAtLeast(0)
                                 }
-                                Text("${detail.episodes[selectedEpisode].index}", color = Color.White,
+                                Text("${selectedEpisode + 1}", color = Color.White,
                                     fontSize = appleTVSp(40f), fontWeight = FontWeight.Bold, textAlign = TextAlign.Center,
                                     modifier = Modifier.widthIn(min = appleTVDp(100f)))
                                 AppleTVStepButton(androidx.compose.material.icons.Icons.Outlined.SkipNext) {
