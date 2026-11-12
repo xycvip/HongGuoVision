@@ -309,7 +309,7 @@ internal fun ImmersiveTheater(state: HongguoUiState, model: HongguoViewModel) {
     val grid = rememberLazyGridState()
     LoadAheadEffect(state.category, { grid.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: -1 },
         { grid.layoutInfo.totalItemsCount }, state.browseDraft == state.browseApplied, model::loadMoreBrowse)
-    LazyVerticalGrid(columns = GridCells.Fixed(3), state = grid, modifier = Modifier.fillMaxSize().testTag("theater_results"),
+    LazyVerticalGrid(columns = if (LocalTvMode.current) GridCells.Adaptive(190.dp) else GridCells.Fixed(3), state = grid, modifier = Modifier.fillMaxSize().testTag("theater_results"),
         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 24.dp).plusNavClearance(),
         horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         item(span = { GridItemSpan(maxLineSpan) }) {
