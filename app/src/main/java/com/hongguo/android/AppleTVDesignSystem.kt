@@ -155,11 +155,11 @@ internal fun AppleTVTabButton(
         modifier
             .onFocusChanged { focused = it.isFocused }
             .graphicsLayerScale(scale)
+            .shadow(if (focused) appleTVDp(12f) else 0.dp, CircleShape,
+                ambientColor = AppleTVColors.focusShadow, spotColor = AppleTVColors.focusShadow)
             .clip(CircleShape)
             .background(fill)
             .then(if (focused) Modifier.border(appleTVDp(2f), AppleTVColors.accent, CircleShape) else Modifier)
-            .shadow(if (focused) appleTVDp(12f) else 0.dp, CircleShape,
-                ambientColor = AppleTVColors.focusShadow, spotColor = AppleTVColors.focusShadow)
             .clickable(onClick = onClick)
             .focusable()
             .widthIn(min = appleTVDp(140f))
