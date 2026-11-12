@@ -91,7 +91,7 @@ internal fun MyScreen(state: HongguoUiState, model: HongguoViewModel,
     }
     // Each destination has one entry: the stat cards open 收藏 / 历史, the account card opens the account page, and the
     // grouped list below holds the rest. The former header gear and 播放历史 row repeated entries already on screen.
-    LazyColumn(Modifier.fillMaxSize().testTag("my_screen").padding(horizontal = 20.dp),
+    LazyColumn(Modifier.fillMaxSize().tvFocusVisual().testTag("my_screen").padding(horizontal = 20.dp),
         contentPadding = PaddingValues(0.dp).plusNavClearance(),
         verticalArrangement = Arrangement.spacedBy(12.dp)) {
         item {
@@ -100,7 +100,7 @@ internal fun MyScreen(state: HongguoUiState, model: HongguoViewModel,
         }
         item {
             Surface(shape = RoundedCornerShape(16.dp), color = CardSurface) {
-                Row(Modifier.fillMaxWidth().testTag("my_account_card").clickable(onClick = onAccount).padding(16.dp), verticalAlignment = Alignment.CenterVertically,
+                Row(Modifier.fillMaxWidth().tvFocusVisual().testTag("my_account_card").clickable(onClick = onAccount).padding(16.dp), verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     Box(Modifier.size(48.dp).clip(RoundedCornerShape(16.dp)).background(Cream), Alignment.Center) {
                         Icon(Icons.Outlined.PersonOutline, null, Modifier.size(28.dp), tint = Muted)
@@ -117,10 +117,10 @@ internal fun MyScreen(state: HongguoUiState, model: HongguoViewModel,
         }
         item {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                MyStat("本机收藏", state.favorites.size, Icons.Outlined.StarBorder, Modifier.weight(1f).testTag("my_favorites")) {
+                MyStat("本机收藏", state.favorites.size, Icons.Outlined.StarBorder, Modifier.weight(1f).tvFocusVisual().testTag("my_favorites")) {
                     model.selectTab(AppTab.LOCAL_FAVORITES)
                 }
-                MyStat("本机看过", state.history.size, Icons.Outlined.History, Modifier.weight(1f).testTag("my_history")) {
+                MyStat("本机看过", state.history.size, Icons.Outlined.History, Modifier.weight(1f).tvFocusVisual().testTag("my_history")) {
                     model.openPlayHistory(local = true)
                 }
             }
@@ -173,7 +173,7 @@ private fun MenuDivider() = HorizontalDivider(color = Canvas, modifier = Modifie
 @Composable
 private fun MyMenuRow(title: String, subtitle: String, tag: String, icon: ImageVector? = null, trailing: String? = null,
                       busy: Boolean = false, onClick: () -> Unit) {
-    Row(Modifier.fillMaxWidth().testTag(tag).clickable(onClick = onClick).padding(16.dp),
+    Row(Modifier.fillMaxWidth().tvFocusVisual().testTag(tag).clickable(onClick = onClick).padding(16.dp),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         if (icon != null) Box(Modifier.size(36.dp).clip(RoundedCornerShape(10.dp)).background(SoftOrange), Alignment.Center) {
             Icon(icon, null, Modifier.size(20.dp), tint = AccentInk)
@@ -191,7 +191,7 @@ private fun MyMenuRow(title: String, subtitle: String, tag: String, icon: ImageV
 @Composable
 private fun PageHeader(title: String, backLabel: String, backTag: String, onBack: () -> Unit) {
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        IconButton(onClick = onBack, modifier = Modifier.testTag(backTag)) {
+        IconButton(onClick = onBack, modifier = Modifier.tvFocusVisual().testTag(backTag)) {
             Icon(Icons.AutoMirrored.Outlined.ArrowBack, backLabel, tint = Ink)
         }
         Text(title, color = Ink, fontSize = 24.sp, fontWeight = FontWeight.Bold)
@@ -202,7 +202,7 @@ private fun PageHeader(title: String, backLabel: String, backTag: String, onBack
 internal fun SystemSettingsScreen(state: HongguoUiState, model: HongguoViewModel,
                                  updateState: UpdateUiState, updateModel: UpdateViewModel,
                                  onTheme: () -> Unit, onBack: () -> Unit) {
-    LazyColumn(Modifier.fillMaxSize().testTag("settings_screen").padding(horizontal = 20.dp),
+    LazyColumn(Modifier.fillMaxSize().tvFocusVisual().testTag("settings_screen").padding(horizontal = 20.dp),
         contentPadding = PaddingValues(0.dp).plusNavClearance(),
         verticalArrangement = Arrangement.spacedBy(12.dp)) {
         item { PageHeader("设置", "返回我的", "settings_back", onBack) }
@@ -245,7 +245,7 @@ internal fun SystemSettingsScreen(state: HongguoUiState, model: HongguoViewModel
 
 @Composable
 internal fun ThemeStyleScreen(state: HongguoUiState, model: HongguoViewModel, onBack: () -> Unit) {
-    LazyColumn(Modifier.fillMaxSize().testTag("theme_screen").padding(horizontal = 20.dp),
+    LazyColumn(Modifier.fillMaxSize().tvFocusVisual().testTag("theme_screen").padding(horizontal = 20.dp),
         contentPadding = PaddingValues(0.dp).plusNavClearance(),
         verticalArrangement = Arrangement.spacedBy(16.dp)) {
         item { PageHeader("主题样式", "返回设置", "theme_back", onBack) }
@@ -284,7 +284,7 @@ internal fun ThemeStyleScreen(state: HongguoUiState, model: HongguoViewModel, on
                             Box(Modifier.weight(1f).heightIn(min = 44.dp).clip(RoundedCornerShape(12.dp))
                                 .background(if (selected) SoftOrange else Cream)
                                 .selectable(selected = selected, role = Role.RadioButton) { model.setThemeMode(mode) }
-                                .testTag("theme_mode_${mode.key}"), contentAlignment = Alignment.Center) {
+                                .tvFocusVisual().testTag("theme_mode_${mode.key}"), contentAlignment = Alignment.Center) {
                                 Text(mode.label, color = if (selected) AccentInk else Muted, fontSize = 14.sp,
                                     fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal)
                             }
@@ -305,7 +305,7 @@ internal fun ThemeOption(style: AppThemeStyle, selected: Boolean, modifier: Modi
     Column(modifier.clip(RoundedCornerShape(16.dp))
         .selectable(selected = selected, role = Role.RadioButton, onClick = onSelect)
         .semantics { contentDescription = "${style.label}主题" }
-        .testTag("theme_option_${style.key}")
+        .tvFocusVisual().testTag("theme_option_${style.key}")
         .border(2.dp, ring, RoundedCornerShape(16.dp))
         .background(CardSurface)
         .padding(6.dp),
@@ -409,7 +409,7 @@ private fun NavBarStyleSetting(selected: NavBarStyle, onSelect: (NavBarStyle) ->
                 val isSelected = style == selected
                 Box(Modifier.weight(1f).tabAnchor(pill, style).heightIn(min = 40.dp).clip(RoundedCornerShape(10.dp))
                     .selectable(selected = isSelected, role = Role.RadioButton) { onSelect(style) }
-                    .testTag("settings_navbar_${style.key}"), contentAlignment = Alignment.Center) {
+                    .tvFocusVisual().testTag("settings_navbar_${style.key}"), contentAlignment = Alignment.Center) {
                     Text(style.label, color = if (isSelected) Ink else Muted, fontSize = 14.sp,
                         fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium)
                 }
@@ -427,7 +427,7 @@ private fun SettingSwitch(title: String, subtitle: String, checked: Boolean, tag
             Text(subtitle, color = Muted, fontSize = 12.sp, lineHeight = 20.sp)
         }
         // Off state uses the secondary text color so the control stays visible on every theme.
-        Switch(checked = checked, onCheckedChange = onChange, modifier = Modifier.testTag(tag),
+        Switch(checked = checked, onCheckedChange = onChange, modifier = Modifier.tvFocusVisual().testTag(tag),
             colors = SwitchDefaults.colors(uncheckedThumbColor = Muted, uncheckedBorderColor = Muted,
                 uncheckedTrackColor = Cream))
     }
@@ -438,12 +438,12 @@ private fun SettingSwitch(title: String, subtitle: String, checked: Boolean, tag
 private fun ImmersiveMine(state: HongguoUiState, model: HongguoViewModel, updateState: UpdateUiState, updateModel: UpdateViewModel,
                           accountName: String?, accountStatus: String, accountAvatar: String?, onAccount: () -> Unit,
                           openSettings: () -> Unit, openTheme: () -> Unit) {
-    LazyColumn(Modifier.fillMaxSize().testTag("my_screen").padding(horizontal = 16.dp),
+    LazyColumn(Modifier.fillMaxSize().tvFocusVisual().testTag("my_screen").padding(horizontal = 16.dp),
         contentPadding = PaddingValues(0.dp).plusNavClearance(),
         verticalArrangement = Arrangement.spacedBy(16.dp)) {
         item {
             Row(Modifier.fillMaxWidth().padding(top = 20.dp).clip(RoundedCornerShape(16.dp)).clickable(onClick = onAccount)
-                .testTag("my_account_card").padding(vertical = 4.dp),
+                .tvFocusVisual().testTag("my_account_card").padding(vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
                 Box(Modifier.size(64.dp).clip(CircleShape).background(Cream), Alignment.Center) {
                     Icon(Icons.Outlined.PersonOutline, null, Modifier.size(32.dp), tint = Ink)
@@ -466,7 +466,7 @@ private fun ImmersiveMine(state: HongguoUiState, model: HongguoViewModel, update
                         Triple(Icons.Outlined.Palette, "主题", openTheme),
                     ).forEachIndexed { index, (icon, label, action) ->
                         Column(Modifier.weight(1f).clip(RoundedCornerShape(12.dp)).clickable(onClick = action)
-                            .heightIn(min = 56.dp).testTag(if (index == 0) "my_history" else "my_shortcut_$index"),
+                            .heightIn(min = 56.dp).tvFocusVisual().testTag(if (index == 0) "my_history" else "my_shortcut_$index"),
                             horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
                             Icon(icon, null, tint = Ink, modifier = Modifier.size(24.dp))
                             Text(label, color = Ink, fontSize = 12.sp)
@@ -487,7 +487,7 @@ private fun ImmersiveMine(state: HongguoUiState, model: HongguoViewModel, update
 @Composable
 private fun CardsMine(state: HongguoUiState, model: HongguoViewModel, updateState: UpdateUiState, updateModel: UpdateViewModel,
                       accountName: String?, accountStatus: String, accountAvatar: String?, onAccount: () -> Unit, openSettings: () -> Unit) {
-    LazyColumn(Modifier.fillMaxSize().testTag("my_screen").padding(horizontal = 12.dp),
+    LazyColumn(Modifier.fillMaxSize().tvFocusVisual().testTag("my_screen").padding(horizontal = 12.dp),
         contentPadding = PaddingValues(0.dp).plusNavClearance(),
         verticalArrangement = Arrangement.spacedBy(12.dp)) {
         item {
@@ -503,7 +503,7 @@ private fun CardsMine(state: HongguoUiState, model: HongguoViewModel, updateStat
                     Text(accountStatus, color = Muted, fontSize = 13.sp)
                 }
                 Surface(onClick = onAccount, shape = RoundedCornerShape(50), color = Ink,
-                    modifier = Modifier.heightIn(min = 36.dp).testTag("my_account_card")) {
+                    modifier = Modifier.heightIn(min = 36.dp).tvFocusVisual().testTag("my_account_card")) {
                     Text(if (accountName == null) "登录" else "账号", color = Canvas, fontSize = 14.sp, fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
                 }
@@ -514,7 +514,7 @@ private fun CardsMine(state: HongguoUiState, model: HongguoViewModel, updateStat
                 listOf(Triple("本机看过", state.history.size, AppTab.HISTORY), Triple("本机收藏", state.favorites.size, AppTab.FAVORITES))
                     .forEach { (label, count, tab) ->
                         Surface(onClick = { model.selectTab(tab) }, color = CardSurface, shape = RoundedCornerShape(14.dp),
-                            modifier = Modifier.weight(1f).testTag(if (tab == AppTab.HISTORY) "my_history" else "my_favorites")) {
+                            modifier = Modifier.weight(1f).tvFocusVisual().testTag(if (tab == AppTab.HISTORY) "my_history" else "my_favorites")) {
                             Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
                                     Icon(if (tab == AppTab.HISTORY) Icons.Outlined.History else Icons.Outlined.StarBorder, null,
