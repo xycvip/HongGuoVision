@@ -36,7 +36,7 @@ internal class GuessFeedPager(
             served++
             batch.items.forEach { item ->
                 if (seen.add(item.series.id)) cards += DramaCard(item.series.id, item.series.title,
-                    item.series.cover, item.episodeCount, item.series.description)
+                    item.series.cover, item.episodeCount, item.series.description, item.series.badge)
             }
             while (seen.size > SEEN_LIMIT) seen.remove(seen.first())
         }
