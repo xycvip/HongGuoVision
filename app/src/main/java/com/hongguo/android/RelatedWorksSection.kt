@@ -42,21 +42,21 @@ internal fun RelatedWorksSection(state: HongguoUiState, model: HongguoViewModel,
     val signedIn = account.sessionStatus == AccountSessionStatus.LOGGED_IN
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Text("相关作品", Modifier.padding(horizontal = horizontalPadding.dp), color = Ink, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
-        LazyRow(Modifier.fillMaxWidth().testTag("related_works"), contentPadding = PaddingValues(horizontal = horizontalPadding.dp),
+        LazyRow(Modifier.fillMaxWidth().tvFocusVisual().testTag("related_works"), contentPadding = PaddingValues(horizontal = horizontalPadding.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             items(state.related, key = { it.series.id }) { work ->
                 val reserved = account.reservations.any { it.card.id.removePrefix("reservation:") == work.series.id }
                 val busy = work.series.id in account.reservationBusyIds
                 Column(Modifier.width(96.dp).clickable(enabled = !work.upcoming) { model.openDrama(work.toCard()) }
-                    .testTag("related_${work.series.id}"), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    .tvFocusVisual().testTag("related_${work.series.id}"), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Cover(work.series.cover, work.series.title, Modifier.fillMaxWidth().height(132.dp))
                     Text(work.season.ifBlank { "相关" }, color = Orange, fontSize = 12.sp, maxLines = 1)
                     Text(work.series.title, color = Ink, fontSize = 13.sp, lineHeight = 18.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
                     if (work.upcoming) {
                         Text(work.releaseText.ifEmpty { "待上线" }, color = Muted, fontSize = 12.sp, maxLines = 1,
-                            overflow = TextOverflow.Ellipsis, modifier = Modifier.testTag("related_release_${work.series.id}"))
+                            overflow = TextOverflow.Ellipsis, modifier = Modifier.tvFocusVisual().testTag("related_release_${work.series.id}"))
                         TextButton(onClick = { if (signedIn) confirmation = work else model.selectTab(AppTab.ACCOUNT) },
-                            enabled = !busy && !reserved, modifier = Modifier.heightIn(min = 40.dp).testTag("related_reserve_${work.series.id}"),
+                            enabled = !busy && !reserved, modifier = Modifier.heightIn(min = 40.dp).tvFocusVisual().testTag("related_reserve_${work.series.id}"),
                             contentPadding = PaddingValues(horizontal = 0.dp)) {
                             Text(when { reserved -> "已预约"; busy -> "预约中…"; signedIn -> "预约"; else -> "登录后预约" }, fontSize = 13.sp)
                         }
@@ -71,7 +71,7 @@ internal fun RelatedWorksSection(state: HongguoUiState, model: HongguoViewModel,
             text = { Text("将在红果账号中预约《${work.series.title}》" + work.releaseText.takeIf { it.isNotEmpty() }?.let { "（$it）" }.orEmpty() +
                 "，上线后可在账号的预约列表查看。") },
             confirmButton = { TextButton(onClick = { confirmation = null; accountModel.reserve(work) },
-                modifier = Modifier.testTag("related_reserve_confirm")) { Text("预约") } },
+                modifier = Modifier.tvFocusVisual().testTag("related_reserve_confirm")) { Text("预约") } },
             dismissButton = { TextButton(onClick = { confirmation = null }) { Text("取消") } })
     }
 }
