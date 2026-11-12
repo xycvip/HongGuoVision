@@ -242,7 +242,12 @@ private fun AppleTVRank(state: HongguoUiState, model: HongguoViewModel) {
         emptyIcon = Icons.Outlined.Leaderboard,
         filters = {
             Text("热播榜", color = AppleTVColors.secondary, fontSize = appleTVSp(14f))
-            com.hongguo.account.protocol.RankBoard.entries.forEach { board ->
+            listOf(
+                com.hongguo.account.protocol.RankBoard.ALL,
+                com.hongguo.account.protocol.RankBoard.COMIC,
+                com.hongguo.account.protocol.RankBoard.REAL,
+                com.hongguo.account.protocol.RankBoard.AI,
+            ).forEach { board ->
                 AppleTVControl(board.label, selected = state.rankBoard == board) {
                     if (state.rankBoard != board) model.selectRankBoard(board)
                 }
@@ -264,7 +269,7 @@ private fun AppleTVSearch(state: HongguoUiState, model: HongguoViewModel) {
     AppleTVSection(
         canvasHeight = appleTVLibraryCanvasHeight(),
         status = state.searchError ?: if (state.searching) "正在搜索…" else "搜索结果 ${state.results.size} 部",
-        emptyText = if (state.searchedQuery.isBlank()) "点击顶部搜索框输入剧名" else "暂无搜索结果",
+        emptyText = if (state.searchedQuery.isBlank()) "点击顶部搜索按钮输入剧名" else "暂无搜索结果",
         emptyIcon = Icons.Outlined.Search,
         showFilters = false,
         filters = {},
