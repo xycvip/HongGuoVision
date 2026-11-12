@@ -125,37 +125,44 @@ class UpdateHttpTest {
         assertTrue(connection.closed)
     }
 
-    @Test fun autoMeansDirectAndNeverFallsBackAfterHttpFailure() = runBlocking {
-        var calls = 0
+    @Test fun autoFallsBackFromHttpFailureAndReportsTheActiveTransport() = runBlocking {
+        val primary = "https://gh-proxy.com/$manifestUrl"
+        val connections = listOf(FakeHttps(manifestUrl, 503), FakeHttps(primary, 200, manifest))
+        val seen = mutableListOf<URI>()
         val sources = mutableListOf<UpdateSource>()
-        try {
-            UpdateRepository { uri ->
-                calls++
-                assertEquals("github.com", uri.host)
-                FakeHttps(uri.toString(), 503)
-            }.check(manifestUrl, repository, UpdateSource.AUTO) { sources.add(it) }
-            fail("default direct route must report its own failure")
-        } catch (error: IOException) { assertStableUpdateError(error, "UPDATE_CHECK_HTTP_503") }
-        assertEquals(1, calls)
-        assertEquals(listOf(UpdateSource.DIRECT), sources)
+        val update = UpdateRepository { uri -> seen.add(uri); connections[seen.lastIndex] }
+            .check(manifestUrl, repository, UpdateSource.AUTO) { sources.add(it) }
+        assertEquals(3L, update.versionCode)
+        assertEquals(listOf(UpdateSource.DIRECT, UpdateSource.PROXY_PRIMARY), sources)
+        assertEquals(listOf("github.com", "gh-proxy.com"), seen.map { it.host })
+        connections.forEach {
+            assertTrue(it.closed)
+            assertNull(it.getRequestProperty("Authorization"))
+            assertNull(it.getRequestProperty("Cookie"))
+        }
+        assertTrue(connections[0].connectTimeout in 1..3_000)
+        assertTrue(connections[0].readTimeout in 1..4_000)
+        assertTrue(connections[1].connectTimeout in 1..5_000)
+        assertTrue(connections[1].readTimeout in 1..7_000)
     }
 
-    @Test fun autoDoesNotRetryManifestTimeoutOnProxyLines() = runBlocking {
+    @Test fun timeoutAndHtmlDoNotPreventBackupManifestValidation() = runBlocking {
+        val connections = listOf(
+            FakeHttps(manifestUrl, 200, responseAction = { throw SocketTimeoutException("synthetic timeout") }),
+            FakeHttps("https://gh-proxy.com/$manifestUrl", 200, "<html>temporary proxy page</html>".toByteArray()),
+            FakeHttps("https://ghfast.top/$manifestUrl", 200, manifest),
+        )
         var calls = 0
         val sources = mutableListOf<UpdateSource>()
-        try {
-            UpdateRepository { uri ->
-                calls++
-                assertEquals("github.com", uri.host)
-                FakeHttps(uri.toString(), 200, responseAction = { throw SocketTimeoutException("synthetic timeout") })
-            }.check(manifestUrl, repository, UpdateSource.AUTO) { sources.add(it) }
-            fail("timeout must not rotate to another route")
-        } catch (error: IOException) { assertStableUpdateError(error, "UPDATE_CHECK_TIMEOUT") }
-        assertEquals(1, calls)
-        assertEquals(listOf(UpdateSource.DIRECT), sources)
+        val update = UpdateRepository { connections[calls++] }
+            .check(manifestUrl, repository, UpdateSource.AUTO) { sources.add(it) }
+        assertEquals(3L, update.versionCode)
+        assertEquals(3, calls)
+        assertEquals(listOf(UpdateSource.DIRECT, UpdateSource.PROXY_PRIMARY, UpdateSource.PROXY_BACKUP), sources)
+        assertTrue(connections.all { it.closed })
     }
 
-    @Test fun invalidManifestMetadataFailsOnTheSelectedRouteWithoutRetry() = runBlocking {
+    @Test fun invalidMetadataIsAFailedRouteEvenWhenHttpWasSuccessful() = runBlocking {
         val badBodies = listOf(
             manifest.toString(Charsets.UTF_8).replace("a".repeat(64), "g".repeat(64)).toByteArray(),
             manifest.toString(Charsets.UTF_8).replace("com.x.hgvision", "com.example.other").toByteArray(),
@@ -163,16 +170,12 @@ class UpdateHttpTest {
         )
         badBodies.forEach { bad ->
             var calls = 0
-            try {
-                UpdateRepository { uri ->
-                    calls++
-                    FakeHttps(uri.toString(), 200, bad)
-                }.check(manifestUrl, repository, UpdateSource.AUTO)
-                fail("invalid manifest must fail without trying another route")
-            } catch (error: IOException) {
-                assertEquals(1, calls)
-                assertTrue(error.message.orEmpty().startsWith("UPDATE_"))
-            }
+            val update = UpdateRepository { uri ->
+                calls++
+                FakeHttps(uri.toString(), 200, if (calls == 1) bad else manifest)
+            }.check(manifestUrl, repository, UpdateSource.AUTO)
+            assertEquals(3L, update.versionCode)
+            assertEquals(2, calls)
         }
     }
 
