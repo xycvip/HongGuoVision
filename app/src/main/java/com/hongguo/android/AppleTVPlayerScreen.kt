@@ -73,7 +73,12 @@ internal fun AppleTVPreparingScreen(state: HongguoUiState, model: HongguoViewMod
     androidx.compose.runtime.LaunchedEffect(state.detailError) {
         if (state.detailError != null) runCatching { retryFocus.requestFocus() }
     }
-    Box(Modifier.fillMaxSize().background(Color.Black), contentAlignment = Alignment.Center) {
+    Box(Modifier.fillMaxSize().background(Color.Black).onPreviewKeyEvent { event ->
+        if (event.type == KeyEventType.KeyUp && event.key == Key.Menu) {
+            model.closeDetail()
+            true
+        } else false
+    }, contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(appleTVDp(16f))) {
             if (state.detailError == null) {
                 CircularProgressIndicator(color = Color.White, modifier = Modifier.width(appleTVDp(44f)).height(appleTVDp(44f)))
