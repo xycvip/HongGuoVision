@@ -136,7 +136,8 @@ class MainActivity : ComponentActivity() {
                         val lastDetail = remember { LastDetailState() }
                         SideEffect { state.selectedCard?.let { lastDetail.key = "detail_${it.id}"; lastDetail.state = state } }
                         val screenKey = state.selectedCard?.let { "detail_${it.id}" } ?: "tab_${state.tab.name}"
-                        Column(Modifier.fillMaxSize()
+                        Column(Modifier.then(if (tvMode) Modifier.widthIn(max = 1440.dp).align(Alignment.Center) else Modifier)
+                            .fillMaxSize()
                             .then(if (floatingNav) Modifier.glassBackdropSource(backdrop).background(Canvas) else Modifier)
                             .padding(pagePadding).semantics { testTagsAsResourceId = true }) {
                         AnimatedContent(targetState = screenKey, label = "page_transition", modifier = Modifier.fillMaxSize(),
