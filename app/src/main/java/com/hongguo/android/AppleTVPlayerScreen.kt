@@ -210,6 +210,7 @@ internal fun AppleTVPlayerScreen(
                     dragging = false
                 },
                 valueRange = 0f..1f,
+                enabled = playback.player != null && playback.durationMs > 0,
             )
             Row(Modifier.focusGroup(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(appleTVDp(14f))) {
                 Text(formatTVTime(if (dragging) (seekValue * playback.durationMs).toLong() else playback.positionMs),
