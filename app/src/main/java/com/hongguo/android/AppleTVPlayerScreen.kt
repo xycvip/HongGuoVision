@@ -314,7 +314,7 @@ internal fun AppleTVPlayerScreen(
                         else LazyRow(Modifier.focusGroup(), horizontalArrangement = Arrangement.spacedBy(appleTVDp(16f))) {
                             items(state.related, key = { it.series.id }) { work ->
                                 val card = DramaCard(work.series.id, work.series.title, work.series.cover,
-                                    work.episodeCount, work.series.description)
+                                    work.episodeCount, work.series.description, work.series.badge)
                                 var focused by remember(work.series.id) { mutableStateOf(false) }
                                 Column(
                                     Modifier.width(appleTVDp(120f))
