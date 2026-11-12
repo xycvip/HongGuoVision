@@ -1,0 +1,216 @@
+name: 手动构建并发布测试版
+
+on:
+  workflow_dispatch:
+    inputs:
+      notes:
+        description: 本次测试内容或更新说明
+        required: false
+        type: string
+        default: "内部测试版本"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: hongguovision-test-release
+  cancel-in-progress: false
+
+jobs:
+  build-and-release:
+    name: 构建、签名并发布测试版
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      TZ: Asia/Shanghai
+      GH_TOKEN: ${{ github.token }}
+
+    steps:
+      - name: 检出 TV 适配开发分支
+        uses: actions/checkout@v4
+        with:
+          ref: feature/tv-large-screen
+          fetch-depth: 0
+
+      - name: 配置 JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: 配置 Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: 检查并准备签名文件
+        shell: bash
+        env:
+          SIGNING_KEY_BASE64: ${{ secrets.SIGNING_KEY_BASE64 }}
+          SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
+          SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          [[ -n "$SIGNING_KEY_BASE64" ]] || { echo "::error::缺少 SIGNING_KEY_BASE64"; exit 1; }
+          [[ -n "$SIGNING_STORE_PASSWORD" ]] || { echo "::error::缺少 SIGNING_STORE_PASSWORD"; exit 1; }
+          [[ -n "$SIGNING_KEY_ALIAS" ]] || { echo "::error::缺少 SIGNING_KEY_ALIAS"; exit 1; }
+          [[ -n "$SIGNING_KEY_PASSWORD" ]] || { echo "::error::缺少 SIGNING_KEY_PASSWORD"; exit 1; }
+
+          KEYSTORE_PATH="$RUNNER_TEMP/hongguovision-upload.jks"
+          printf '%s' "$SIGNING_KEY_BASE64" | base64 --decode > "$KEYSTORE_PATH"
+          test -s "$KEYSTORE_PATH"
+          echo "SIGNING_KEYSTORE_PATH=$KEYSTORE_PATH" >> "$GITHUB_ENV"
+
+          keytool -list -keystore "$KEYSTORE_PATH" \
+            -storepass "$SIGNING_STORE_PASSWORD" \
+            -alias "$SIGNING_KEY_ALIAS" >/dev/null
+          echo "签名文件及 Alias 校验通过。"
+
+      - name: 计算版本号和当天发布序号
+        id: version
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          TODAY="$(date +'%y%m%d')"
+          MAX_PATCH=0
+          TODAY_MAX=0
+
+          while IFS= read -r TAG; do
+            [[ -n "$TAG" ]] || continue
+            if [[ "$TAG" =~ ^test-v0\.0\.([0-9]+)-([0-9]{6})([0-9]{3})$ ]]; then
+              PATCH="${BASH_REMATCH[1]}"
+              TAG_DATE="${BASH_REMATCH[2]}"
+              SEQUENCE="${BASH_REMATCH[3]}"
+              PATCH_NUM=$((10#$PATCH))
+              if (( PATCH_NUM > MAX_PATCH )); then MAX_PATCH="$PATCH_NUM"; fi
+              if [[ "$TAG_DATE" == "$TODAY" ]] && (( 10#$SEQUENCE > TODAY_MAX )); then
+                TODAY_MAX=$((10#$SEQUENCE))
+              fi
+            fi
+          done < <(gh release list --limit 1000 --json tagName --jq '.[].tagName')
+
+          VERSION_PATCH=$((MAX_PATCH + 1))
+          VERSION_NAME="0.0.$VERSION_PATCH"
+          NEXT_SEQUENCE=$((TODAY_MAX + 1))
+          if (( NEXT_SEQUENCE > 999 )); then
+            echo "::error::当天测试版发布次数已超过 999 次。"
+            exit 1
+          fi
+          printf -v VERSION_CODE '%s%03d' "$TODAY" "$NEXT_SEQUENCE"
+          TAG="test-v${VERSION_NAME}-${VERSION_CODE}"
+          SOURCE_SHA="$(git rev-parse HEAD)"
+
+          {
+            echo "version_name=$VERSION_NAME"
+            echo "version_code=$VERSION_CODE"
+            echo "tag=$TAG"
+            echo "source_sha=$SOURCE_SHA"
+          } >> "$GITHUB_OUTPUT"
+
+          echo "版本名称：$VERSION_NAME"
+          echo "内部升级码：$VERSION_CODE"
+          echo "Release Tag：$TAG"
+          echo "源码提交：$SOURCE_SHA"
+
+      - name: 运行单元测试并构建签名 APK
+        shell: bash
+        env:
+          SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
+          SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          chmod +x ./gradlew
+          ./gradlew --no-daemon \
+            -PappVersionCode="${{ steps.version.outputs.version_code }}" \
+            -PappVersionName="${{ steps.version.outputs.version_name }}" \
+            :app:testReleaseUnitTest \
+            :app:assembleRelease
+
+      - name: 校验 APK 包名、版本和签名指纹
+        id: verify
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          APK="app/build/outputs/apk/release/app-release.apk"
+          test -s "$APK"
+
+          SDK_ROOT="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
+          [[ -n "$SDK_ROOT" ]] || { echo "::error::找不到 Android SDK"; exit 1; }
+          APKSIGNER="$(find "$SDK_ROOT/build-tools" -type f -name apksigner | sort -V | tail -n 1)"
+          AAPT="$(find "$SDK_ROOT/build-tools" -type f -name aapt | sort -V | tail -n 1)"
+          [[ -x "$APKSIGNER" && -x "$AAPT" ]] || { echo "::error::找不到 apksigner/aapt"; exit 1; }
+
+          BADGING="$("$AAPT" dump badging "$APK")"
+          echo "$BADGING" | grep -F "package: name='com.x.hgvision' versionCode='${{ steps.version.outputs.version_code }}' versionName='${{ steps.version.outputs.version_name }}'"
+          echo "$BADGING" | grep -F "sdkVersion:'26'"
+
+          EXPECTED_FINGERPRINT="$(tr -d '[:space:]' < release-signing.sha256 | tr '[:upper:]' '[:lower:]')"
+          ACTUAL_FINGERPRINT="$("$APKSIGNER" verify --print-certs "$APK" | sed -n 's/.*SHA-256 digest: //p' | head -n 1 | tr -d ':' | tr '[:upper:]' '[:lower:]')"
+          [[ -n "$EXPECTED_FINGERPRINT" && "$ACTUAL_FINGERPRINT" == "$EXPECTED_FINGERPRINT" ]] || {
+            echo "::error::签名证书指纹不匹配，停止发布。"
+            echo "期望：$EXPECTED_FINGERPRINT"
+            echo "实际：$ACTUAL_FINGERPRINT"
+            exit 1
+          }
+
+          APK_NAME="HongGuoVision-${{ steps.version.outputs.version_name }}-${{ steps.version.outputs.version_code }}.apk"
+          cp "$APK" "$APK_NAME"
+          sha256sum "$APK_NAME" > "SHA256SUMS-${{ steps.version.outputs.version_code }}.txt"
+          git archive --format=zip --output="HongGuoVision-source-${{ steps.version.outputs.version_name }}.zip" "${{ steps.version.outputs.source_sha }}"
+
+          echo "apk_name=$APK_NAME" >> "$GITHUB_OUTPUT"
+          echo "fingerprint=$ACTUAL_FINGERPRINT" >> "$GITHUB_OUTPUT"
+          echo "apk_size=$(stat -c '%s' "$APK_NAME")" >> "$GITHUB_OUTPUT"
+          echo "apk_sha256=$(sha256sum "$APK_NAME" | cut -d ' ' -f 1)" >> "$GITHUB_OUTPUT"
+
+      - name: 发布到本仓库 Releases
+        shell: bash
+        env:
+          RELEASE_NOTES_INPUT: ${{ inputs.notes }}
+        run: |
+          set -euo pipefail
+          VERSION_NAME="${{ steps.version.outputs.version_name }}"
+          VERSION_CODE="${{ steps.version.outputs.version_code }}"
+          TAG="${{ steps.version.outputs.tag }}"
+          APK_NAME="${{ steps.verify.outputs.apk_name }}"
+          SOURCE_ZIP="HongGuoVision-source-${VERSION_NAME}.zip"
+          CHECKSUM_FILE="SHA256SUMS-${VERSION_CODE}.txt"
+          TITLE="HongGuo Vision 测试版 ${VERSION_NAME}（${VERSION_CODE}）"
+
+          cat > release-notes.md <<EOF
+          ## 测试说明
+          ${RELEASE_NOTES_INPUT:-内部测试版本}
+
+          ## 构建信息
+          - 版本名称：${VERSION_NAME}
+          - 内部升级码：${VERSION_CODE}
+          - 应用包名：com.x.hgvision
+          - 最低系统：Android 8.0（API 26）
+          - 签名证书 SHA-256：${{ steps.verify.outputs.fingerprint }}
+          - APK SHA-256：${{ steps.verify.outputs.apk_sha256 }}
+          - APK 大小：${{ steps.verify.outputs.apk_size }} 字节
+
+          本版本为内部测试预发布版本，不代表正式稳定版。
+          EOF
+
+          gh release create "$TAG" \
+            "$APK_NAME" \
+            "$SOURCE_ZIP" \
+            "$CHECKSUM_FILE" \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "$TITLE" \
+            --notes-file release-notes.md \
+            --prerelease \
+            --target "${{ steps.version.outputs.source_sha }}"
+
+          {
+            echo "## 测试版发布完成"
+            echo "- 版本：${VERSION_NAME}"
+            echo "- 内部升级码：${VERSION_CODE}"
+            echo "- Release：https://github.com/${GITHUB_REPOSITORY}/releases/tag/${TAG}"
+            echo "- APK：${APK_NAME}"
+            echo "- SHA-256：${{ steps.verify.outputs.apk_sha256 }}"
+            echo "- 签名证书：${{ steps.verify.outputs.fingerprint }}"
+          } >> "$GITHUB_STEP_SUMMARY"

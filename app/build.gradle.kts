@@ -4,6 +4,15 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
+val releaseSigningStoreFile = providers.environmentVariable("SIGNING_KEYSTORE_PATH").orNull
+val releaseStorePassword = providers.environmentVariable("SIGNING_STORE_PASSWORD").orNull
+val releaseKeyAlias = providers.environmentVariable("SIGNING_KEY_ALIAS").orNull
+val releaseKeyPassword = providers.environmentVariable("SIGNING_KEY_PASSWORD").orNull
+val hasReleaseSigning = !releaseSigningStoreFile.isNullOrBlank() &&
+    !releaseStorePassword.isNullOrBlank() &&
+    !releaseKeyAlias.isNullOrBlank() &&
+    !releaseKeyPassword.isNullOrBlank()
+
 android {
     namespace = "com.hongguo.android"
     compileSdk = 36
@@ -11,11 +20,21 @@ android {
         applicationId = "com.x.hgvision"
         minSdk = 26
         targetSdk = 36
-        versionCode = providers.gradleProperty("appVersionCode").orElse("38").get().toInt()
-        versionName = providers.gradleProperty("appVersionName").orElse("0.7.27").get()
+        versionCode = providers.gradleProperty("appVersionCode").orElse("1").get().toInt()
+        versionName = providers.gradleProperty("appVersionName").orElse("0.0.1").get()
         buildConfigField("String", "UPDATE_REPOSITORY", "\"OOIUa/hongguo-android\"")
         buildConfigField("String", "UPDATE_MANIFEST_URL", "\"https://github.com/OOIUa/hongguo-android/releases/latest/download/update.json\"")
         testInstrumentationRunner = "com.hongguo.android.HongguoTestRunner"
+    }
+    signingConfigs {
+        create("release") {
+            if (!releaseSigningStoreFile.isNullOrBlank()) {
+                storeFile = file(releaseSigningStoreFile)
+            }
+            storePassword = releaseStorePassword.orEmpty()
+            keyAlias = releaseKeyAlias.orEmpty()
+            keyPassword = releaseKeyPassword.orEmpty()
+        }
     }
     buildTypes {
         debug {
@@ -28,6 +47,9 @@ android {
             )
         }
         release {
+            if (hasReleaseSigning) {
+                signingConfig = signingConfigs.getByName("release")
+            }
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
