@@ -21,6 +21,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -47,8 +48,10 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -256,12 +259,22 @@ internal fun AppleTVPlayerScreen(
                             Text("第 ${selectedEpisode + 1} 集 / 共 ${detail.episodes.size} 集",
                                 color = Color.White, fontSize = appleTVSp(22f), fontWeight = FontWeight.Bold)
                             Spacer(Modifier.height(appleTVDp(14f)))
-                            Row(Modifier.focusGroup(), horizontalArrangement = Arrangement.spacedBy(appleTVDp(12f)), verticalAlignment = Alignment.CenterVertically) {
-                                AppleTVControl("−10") { targetEpisode = (selectedEpisode - 10).coerceAtLeast(0) }
-                                AppleTVControl("−1") { targetEpisode = (selectedEpisode - 1).coerceAtLeast(0) }
-                                AppleTVControl("${detail.episodes[selectedEpisode].index}") { }
-                                AppleTVControl("+1") { targetEpisode = (selectedEpisode + 1).coerceAtMost(detail.episodes.lastIndex) }
-                                AppleTVControl("+10") { targetEpisode = (selectedEpisode + 10).coerceAtMost(detail.episodes.lastIndex) }
+                            Row(Modifier.focusGroup(), horizontalArrangement = Arrangement.spacedBy(appleTVDp(16f)), verticalAlignment = Alignment.CenterVertically) {
+                                AppleTVStepButton(androidx.compose.material.icons.Icons.Outlined.FastRewind) {
+                                    targetEpisode = (selectedEpisode - 10).coerceAtLeast(0)
+                                }
+                                AppleTVStepButton(androidx.compose.material.icons.Icons.Outlined.SkipPrevious) {
+                                    targetEpisode = (selectedEpisode - 1).coerceAtLeast(0)
+                                }
+                                Text("${detail.episodes[selectedEpisode].index}", color = Color.White,
+                                    fontSize = appleTVSp(40f), fontWeight = FontWeight.Bold, textAlign = TextAlign.Center,
+                                    modifier = Modifier.widthIn(min = appleTVDp(100f)))
+                                AppleTVStepButton(androidx.compose.material.icons.Icons.Outlined.SkipNext) {
+                                    targetEpisode = (selectedEpisode + 1).coerceAtMost(detail.episodes.lastIndex)
+                                }
+                                AppleTVStepButton(androidx.compose.material.icons.Icons.Outlined.FastForward) {
+                                    targetEpisode = (selectedEpisode + 10).coerceAtMost(detail.episodes.lastIndex)
+                                }
                                 if (selectedEpisode == state.episodePosition) {
                                     Text("正在播放", color = AppleTVColors.secondary, fontSize = appleTVSp(16f), fontWeight = FontWeight.SemiBold)
                                 } else {
@@ -337,4 +350,27 @@ internal fun AppleTVPlayerScreen(
 private fun formatTVTime(ms: Long): String {
     val total = (ms.coerceAtLeast(0) / 1000).toInt()
     return "%d:%02d".format(total / 60, total % 60)
+}
+
+@Composable
+private fun AppleTVStepButton(icon: ImageVector, onClick: () -> Unit) {
+    var focused by remember { mutableStateOf(false) }
+    val shape = RoundedCornerShape(appleTVDp(6f))
+    Box(
+        Modifier.width(appleTVDp(32f)).height(appleTVDp(32f))
+            .onFocusChanged { focused = it.isFocused }
+            .graphicsLayer { val scale = if (focused) 1.05f else 1f; scaleX = scale; scaleY = scale }
+            .shadow(if (focused) appleTVDp(12f) else 0.dp, shape,
+                ambientColor = AppleTVColors.focusShadow, spotColor = AppleTVColors.focusShadow)
+            .clip(shape)
+            .background(AppleTVColors.normalFill)
+            .then(if (focused) Modifier.border(appleTVDp(2f), AppleTVColors.accent, shape)
+                else Modifier.border(1.dp, Color.White.copy(alpha = .35f), shape))
+            .clickable(onClick = onClick)
+            .focusable(),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(icon, contentDescription = null, modifier = Modifier.width(appleTVDp(22f)).height(appleTVDp(22f)),
+            tint = Color.White)
+    }
 }
