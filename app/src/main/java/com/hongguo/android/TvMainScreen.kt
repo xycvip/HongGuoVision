@@ -36,6 +36,14 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Surface
@@ -253,7 +261,7 @@ private fun TvMainScreen(
                 state.tab == AppTab.CATEGORY -> TvCategoryContent(state, model)
                 state.tab == AppTab.RANK -> TvRankContent(state, model)
                 state.tab == AppTab.FAVORITES || state.tab == AppTab.HISTORY -> TvLibraryContent(state, model)
-                state.tab == AppTab.SEARCH -> SearchScreen(state, model, trending = state.home.items.take(10))
+                state.tab == AppTab.SEARCH -> TvSearchContent(state, model)
                 state.tab == AppTab.MINE -> MyScreen(state, model, updateState, updateModel,
                     accountName = accountName, accountAvatar = accountAvatar, accountStatus = accountStatus,
                     style = AppThemeStyle.IMMERSIVE)
@@ -556,6 +564,89 @@ private fun TvAction(
         Box(Modifier.padding(horizontal = 18.dp, vertical = 10.dp), contentAlignment = Alignment.Center) {
             Text(label, color = if (secondary || focused) TvText else Color.White, fontSize = 14.sp,
                 fontWeight = FontWeight.Bold, maxLines = 1)
+        }
+    }
+}
+
+
+@Composable
+private fun TvSearchContent(state: HongguoUiState, model: HongguoViewModel) {
+    val searchFocus = remember { FocusRequester() }
+    val keyboard = LocalSoftwareKeyboardController.current
+    LaunchedEffect(Unit) { runCatching { searchFocus.requestFocus() } }
+    val submit = {
+        keyboard?.hide()
+        model.search()
+    }
+    Column(Modifier.fillMaxSize().padding(end = 18.dp).testTag("tv_search"),
+        verticalArrangement = Arrangement.spacedBy(18.dp)) {
+        Text("搜索短剧", color = TvText, fontSize = 30.sp, fontWeight = FontWeight.Black)
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically) {
+            OutlinedTextField(
+                value = state.query,
+                onValueChange = model::updateQuery,
+                modifier = Modifier.weight(1f).focusRequester(searchFocus).heightIn(min = 58.dp)
+                    .testTag("tv_search_input"),
+                placeholder = { Text("输入剧名或关键词", color = TvMuted, fontSize = 17.sp) },
+                singleLine = true,
+                textStyle = TextStyle(color = TvText, fontSize = 18.sp),
+                shape = RoundedCornerShape(14.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = TvText,
+                    unfocusedTextColor = TvText,
+                    focusedContainerColor = TvPanel,
+                    unfocusedContainerColor = TvPanel,
+                    focusedBorderColor = TvAccent,
+                    unfocusedBorderColor = TvMuted.copy(alpha = .45f),
+                    cursorColor = TvAccent
+                ),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                keyboardActions = KeyboardActions(onSearch = { submit() })
+            )
+            Button(onClick = submit, enabled = state.query.isNotBlank(),
+                modifier = Modifier.heightIn(min = 56.dp).testTag("tv_search_submit")) {
+                Text("搜索", fontSize = 16.sp)
+            }
+            if (state.searching) {
+                TvAction("取消", onClick = model::cancelSearch, secondary = true)
+            }
+        }
+        if (state.searching) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                CircularProgressIndicator(Modifier.size(20.dp), color = TvAccent, strokeWidth = 2.dp)
+                Text("正在搜索…", color = TvMuted, fontSize = 15.sp)
+            }
+        } else if (state.searchedQuery.isNotBlank()) {
+            Text("“${state.searchedQuery}” 的搜索结果  ·  ${state.results.size} 部",
+                color = TvMuted, fontSize = 15.sp)
+        } else {
+            Text("输入剧名，按确认键或选择搜索", color = TvMuted, fontSize = 14.sp)
+        }
+        if (state.results.isEmpty() && !state.searching) {
+            Box(Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Text(state.searchError ?: if (state.searchedQuery.isBlank()) "输入关键词开始搜索" else "没有找到相关短剧",
+                        color = TvText, fontSize = 19.sp, fontWeight = FontWeight.Medium)
+                    if (state.searchError != null) TvAction("重试", onClick = model::search)
+                }
+            }
+        } else {
+            LazyVerticalGrid(columns = GridCells.Adaptive(148.dp), modifier = Modifier.weight(1f).fillMaxWidth(),
+                contentPadding = PaddingValues(8.dp), horizontalArrangement = Arrangement.spacedBy(18.dp),
+                verticalArrangement = Arrangement.spacedBy(18.dp)) {
+                itemsIndexed(state.results, key = { _, card -> card.id }) { _, card ->
+                    TvPosterCard(card, if (card.episodeCount > 0) "全 ${card.episodeCount} 集" else "短剧") {
+                        keyboard?.hide()
+                        model.openDrama(card)
+                    }
+                }
+                if (state.searchError != null) item { TvAction("重试", onClick = model::loadMore) }
+                else if (state.hasMore) item {
+                    TvAction(if (state.loadingMore) "正在加载…" else "加载更多",
+                        onClick = model::loadMore, enabled = !state.loadingMore)
+                }
+            }
         }
     }
 }
