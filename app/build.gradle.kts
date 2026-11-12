@@ -8,7 +8,7 @@ android {
     namespace = "com.hongguo.android"
     compileSdk = 36
     defaultConfig {
-        applicationId = "com.hongguo.android"
+        applicationId = "com.x.hgvision"
         minSdk = 26
         targetSdk = 36
         versionCode = providers.gradleProperty("appVersionCode").orElse("38").get().toInt()
