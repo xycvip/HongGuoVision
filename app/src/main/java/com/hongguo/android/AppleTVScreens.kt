@@ -92,7 +92,8 @@ internal fun AppleTVLibraryScreen(
     val mineFocus = androidx.compose.runtime.remember { FocusRequester() }
     val searchFocus = androidx.compose.runtime.remember { FocusRequester() }
     Column(Modifier.fillMaxSize().background(AppleTVColors.background).onPreviewKeyEvent { event ->
-        if (event.type == KeyEventType.KeyUp && event.key == Key.Menu && state.tab != AppTab.HOME) {
+        if (event.type == KeyEventType.KeyUp && event.key == Key.Menu &&
+            accountState.qrBytes == null && state.tab != AppTab.HOME) {
             model.selectTab(AppTab.HOME)
             true
         } else false
