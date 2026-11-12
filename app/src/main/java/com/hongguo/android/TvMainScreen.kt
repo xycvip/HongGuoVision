@@ -11,6 +11,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
@@ -57,6 +58,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.testTag
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.hongguo.account.AccountSessionStatus
@@ -194,7 +196,7 @@ private fun TvSidebar(selected: AppTab, onSelect: (AppTab) -> Unit) {
                 border = if (focused) BorderStroke(2.dp, TvAccent) else null,
                 modifier = Modifier.fillMaxWidth().height(54.dp)
                     .then(if (index == 0) Modifier.focusRequester(firstFocus) else Modifier)
-                    .onFocusChanged { focused = it.isFocused }.focusable()) {
+                    .onFocusChanged { focused = it.isFocused }) {
                 Box(Modifier.padding(horizontal = 18.dp).fillMaxSize(), contentAlignment = Alignment.CenterStart) {
                     Text(label, color = if (selectedItem || focused) TvText else TvMuted,
                         fontSize = 17.sp, fontWeight = if (selectedItem || focused) FontWeight.Bold else FontWeight.Medium)
@@ -292,7 +294,7 @@ private fun TvPosterCard(card: DramaCard, subtitle: String, onClick: () -> Unit)
     Column(Modifier.width(142.dp).graphicsLayer(scaleX = scale, scaleY = scale)
         .onFocusChanged { focused = it.isFocused }.clip(RoundedCornerShape(13.dp))
         .background(if (focused) TvPanelFocused else Color.Transparent)
-        .clickable(onClick = onClick).focusable().padding(5.dp).testTag("tv_card_" + card.id),
+        .clickable(onClick = onClick).border(BorderStroke(2.dp, if (focused) TvAccent else Color.Transparent), RoundedCornerShape(13.dp)).padding(5.dp).testTag("tv_card_" + card.id),
         verticalArrangement = Arrangement.spacedBy(7.dp)) {
         PosterImage(card.cover, Modifier.fillMaxWidth().aspectRatio(.72f).clip(RoundedCornerShape(10.dp)))
         Text(card.title, color = if (focused) TvText else TvMuted, fontSize = 14.sp,
@@ -343,7 +345,7 @@ private fun TvRankContent(state: HongguoUiState, model: HongguoViewModel) {
                     var focused by remember { mutableStateOf(false) }
                     Row(Modifier.fillMaxWidth().height(116.dp).clip(RoundedCornerShape(14.dp))
                         .background(if (focused) TvPanelFocused else TvPanel).clickable { model.openDrama(card) }
-                        .onFocusChanged { focused = it.isFocused }.focusable().padding(8.dp),
+                        .onFocusChanged { focused = it.isFocused }.padding(8.dp),
                         horizontalArrangement = Arrangement.spacedBy(18.dp), verticalAlignment = Alignment.CenterVertically) {
                         Text(entry.rank.toString(), color = TvAccent, fontSize = 23.sp, fontWeight = FontWeight.Black,
                             modifier = Modifier.width(38.dp))
