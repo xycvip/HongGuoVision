@@ -327,7 +327,7 @@ private fun CatalogGrid(
     val grid = rememberLazyGridState()
     LoadAheadEffect(feed, { grid.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: -1 },
         { grid.layoutInfo.totalItemsCount }, canLoadMore, onMore)
-    LazyVerticalGrid(columns = if (columns > 0) GridCells.Fixed(columns) else GridCells.Adaptive(minimumCardWidth), state = grid,
+    LazyVerticalGrid(columns = if (LocalTvMode.current) GridCells.Adaptive(190.dp) else if (columns > 0) GridCells.Fixed(columns) else GridCells.Adaptive(minimumCardWidth), state = grid,
         modifier = Modifier.fillMaxSize().testTag("${tagPrefix}_results"),
         contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 4.dp, bottom = 24.dp).plusNavClearance(),
         horizontalArrangement = Arrangement.spacedBy(if (columns >= 3) 10.dp else 12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -356,7 +356,7 @@ private fun CatalogGrid(
 
 @Composable
 private fun CatalogPoster(card: DramaCard, tag: String, tall: Boolean = false, modifier: Modifier = Modifier, onClick: () -> Unit) {
-    Column(modifier.fillMaxWidth().clickable(role = Role.Button, onClick = onClick).testTag(tag),
+    Column(modifier.fillMaxWidth().tvFocusVisual().clickable(role = Role.Button, onClick = onClick).testTag(tag),
         verticalArrangement = Arrangement.spacedBy(5.dp)) {
         Cover(card.cover, card.title, Modifier.fillMaxWidth().aspectRatio(if (tall) .75f else .95f)
             .clip(RoundedCornerShape(if (tall) 12.dp else 16.dp)))
