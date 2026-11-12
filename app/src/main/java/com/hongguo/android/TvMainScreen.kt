@@ -407,9 +407,10 @@ private fun TvPosterCard(card: DramaCard, subtitle: String, onClick: () -> Unit)
     var focused by remember { mutableStateOf(false) }
     val scale by animateFloatAsState(if (focused) 1.055f else 1f, label = "tv_poster_scale")
     Column(Modifier.width(142.dp).graphicsLayer(scaleX = scale, scaleY = scale)
-        .focusable().onFocusChanged { focused = it.isFocused }.clip(RoundedCornerShape(13.dp))
+        .clip(RoundedCornerShape(13.dp))
         .background(if (focused) TvPanelFocused else Color.Transparent)
-        .clickable(onClick = onClick).border(BorderStroke(2.dp, if (focused) TvAccent else Color.Transparent), RoundedCornerShape(13.dp)).padding(5.dp).testTag("tv_card_" + card.id),
+        .clickable(onClick = onClick).onFocusChanged { focused = it.isFocused }
+        .border(BorderStroke(2.dp, if (focused) TvAccent else Color.Transparent), RoundedCornerShape(13.dp)).padding(5.dp).testTag("tv_card_" + card.id),
         verticalArrangement = Arrangement.spacedBy(7.dp)) {
         PosterImage(card.cover, Modifier.fillMaxWidth().aspectRatio(.72f).clip(RoundedCornerShape(10.dp)))
         Text(card.title, color = if (focused) TvText else TvMuted, fontSize = 14.sp,
@@ -460,7 +461,7 @@ private fun TvRankContent(state: HongguoUiState, model: HongguoViewModel) {
                     var focused by remember { mutableStateOf(false) }
                     Row(Modifier.fillMaxWidth().height(116.dp).clip(RoundedCornerShape(14.dp))
                         .background(if (focused) TvPanelFocused else TvPanel).clickable { model.openDrama(card) }
-                        .focusable().onFocusChanged { focused = it.isFocused }.padding(8.dp),
+                        .onFocusChanged { focused = it.isFocused }.padding(8.dp),
                         horizontalArrangement = Arrangement.spacedBy(18.dp), verticalAlignment = Alignment.CenterVertically) {
                         Text(entry.rank.toString(), color = TvAccent, fontSize = 23.sp, fontWeight = FontWeight.Black,
                             modifier = Modifier.width(38.dp))
