@@ -201,7 +201,8 @@ private fun PageHeader(title: String, backLabel: String, backTag: String, onBack
 @Composable
 internal fun SystemSettingsScreen(state: HongguoUiState, model: HongguoViewModel,
                                  updateState: UpdateUiState, updateModel: UpdateViewModel,
-                                 onTheme: () -> Unit, onBack: () -> Unit) {
+                                 onTheme: () -> Unit, onBack: () -> Unit,
+                                 displayMode: AppDisplayMode, onDisplayMode: (AppDisplayMode) -> Unit) {
     LazyColumn(Modifier.fillMaxSize().testTag("settings_screen").padding(horizontal = 20.dp),
         contentPadding = PaddingValues(0.dp).plusNavClearance(),
         verticalArrangement = Arrangement.spacedBy(12.dp)) {
