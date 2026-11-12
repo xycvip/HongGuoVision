@@ -27,6 +27,7 @@ data class DramaCard(
     val cover: String,
     val episodeCount: Int,
     val summary: String,
+    val badge: String = "",
 )
 
 data class Episode(val id: String, val index: Int, val title: String)
