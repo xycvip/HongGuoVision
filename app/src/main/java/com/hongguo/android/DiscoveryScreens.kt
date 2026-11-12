@@ -128,7 +128,7 @@ private fun warmColumns(): Int {
 
 @Composable
 private fun WarmFeaturedBanner(card: DramaCard, onOpen: () -> Unit, onPlay: () -> Unit) {
-    Box(Modifier.fillMaxWidth().height(188.dp).clip(RoundedCornerShape(20.dp))
+    Box(Modifier.fillMaxWidth().tvFocusVisual().height(188.dp).clip(RoundedCornerShape(20.dp))
         .clickable(role = Role.Button, onClick = onOpen).testTag("home_featured")) {
         Cover(card.cover, card.title, Modifier.fillMaxSize())
         Box(Modifier.fillMaxSize().background(androidx.compose.ui.graphics.Brush.verticalGradient(
@@ -165,7 +165,7 @@ private fun WarmContinueRail(entries: List<LibraryEntry>, onOpen: (LibraryEntry)
         LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             items(entries.take(8), key = { it.card.id }) { entry ->
                 Surface(onClick = { onOpen(entry) }, color = CardSurface, shape = RoundedCornerShape(14.dp),
-                    modifier = Modifier.width(250.dp).testTag(if (entry == entries.first()) "home_continue_play" else "home_continue_${entry.card.id}")) {
+                    modifier = Modifier.width(250.dp).tvFocusVisual().testTag(if (entry == entries.first()) "home_continue_play" else "home_continue_${entry.card.id}")) {
                     Row(Modifier.padding(8.dp), horizontalArrangement = Arrangement.spacedBy(10.dp),
                         verticalAlignment = Alignment.CenterVertically) {
                         Cover(entry.card.cover, entry.card.title, Modifier.width(54.dp).height(72.dp))
