@@ -137,9 +137,7 @@ internal fun AppleTVLibraryScreen(
             AppTab.CATEGORY -> AppleTVDiscover(state, model)
             AppTab.RANK -> AppleTVRank(state, model)
             AppTab.SEARCH -> AppleTVSearch(state, model)
-            AppTab.MINE, AppTab.FAVORITES, AppTab.HISTORY -> AppleTVMine(state, model, accountName, accountStatus, accountState, accountModel, onAccount) {
-                model.selectTab(AppTab.SETTINGS)
-            }
+            AppTab.MINE, AppTab.FAVORITES, AppTab.HISTORY -> AppleTVMine(state, model, accountName, accountStatus, accountState, accountModel, onAccount)
             AppTab.ACCOUNT -> AccountScreen(accountModel, onBack = model::closeAccount, onOpenLibrary = model::openLibrary)
             AppTab.SETTINGS -> SystemSettingsScreen(state, model, updateState, updateModel,
                 onTheme = { model.selectTab(AppTab.THEME_STYLE) }, onBack = model::closeSettings)
@@ -286,7 +284,6 @@ private fun AppleTVMine(
     accountState: AccountState,
     accountModel: com.hongguo.account.AccountViewModel,
     onAccount: () -> Unit,
-    onSettings: () -> Unit,
 ) {
     var category by rememberSaveable { mutableStateOf("收藏") }
     val cloud = accountState.sessionStatus == AccountSessionStatus.LOGGED_IN
@@ -328,7 +325,6 @@ private fun AppleTVMine(
                         accountModel.startQrLogin()
                     }
                 }
-                AppleTVControl("设置", onClick = onSettings)
             },
             cards = items.map { it.card },
             loading = false,
