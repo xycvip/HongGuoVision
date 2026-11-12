@@ -297,7 +297,7 @@ private fun AppleTVMine(
     }
     val qrFocus = androidx.compose.runtime.remember { FocusRequester() }
     val loginFocus = androidx.compose.runtime.remember { FocusRequester() }
-    val accountFocus = androidx.compose.runtime.remember { FocusRequester() }
+    val logoutFocus = androidx.compose.runtime.remember { FocusRequester() }
     val qrBitmap = remember(accountState.qrBytes) {
         accountState.qrBytes?.let { bytes -> runCatching { BitmapFactory.decodeByteArray(bytes, 0, bytes.size)?.asImageBitmap() }.getOrNull() }
     }
@@ -305,7 +305,7 @@ private fun AppleTVMine(
     LaunchedEffect(qrBitmap, cloud) {
         if (qrBitmap != null) runCatching { qrFocus.requestFocus() }
         else if (!cloud) runCatching { loginFocus.requestFocus() }
-        else runCatching { accountFocus.requestFocus() }
+        else runCatching { logoutFocus.requestFocus() }
     }
 
     Box(Modifier.fillMaxSize()) {
@@ -322,9 +322,9 @@ private fun AppleTVMine(
                 AppleTVControl("历史", selected = category == "历史") { category = "历史" }
                 AppleTVControl("预约", selected = category == "预约") { category = "预约" }
                 if (cloud) {
-                    Text(accountName ?: "红果用户", color = Color.White, fontSize = appleTVSp(16f), fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.focusRequester(accountFocus))
-                    AppleTVControl("登出", enabled = !accountState.busy, onClick = accountModel::logout)
+                    Text(accountName ?: "红果用户", color = Color.White, fontSize = appleTVSp(16f), fontWeight = FontWeight.SemiBold)
+                    AppleTVControl("登出", enabled = !accountState.busy,
+                        modifier = Modifier.focusRequester(logoutFocus), onClick = accountModel::logout)
                 } else {
                     AppleTVControl("扫码登录", icon = Icons.Outlined.QrCode2, enabled = !accountState.busy,
                         modifier = Modifier.focusRequester(loginFocus)) {
