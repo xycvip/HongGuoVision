@@ -257,7 +257,8 @@ internal fun AppleTVPlayerScreen(
             Column(
                 Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(appleTVDp(300f))
                     .padding(horizontal = appleTVDp(64f), vertical = appleTVDp(24f))
-                    .background(Color(0xF0181818), RoundedCornerShape(appleTVDp(18f))).padding(appleTVDp(24f)),
+                    .background(Color(0xF0181818), RoundedCornerShape(appleTVDp(18f)))
+                    .padding(if (infoTab == "相关作品") appleTVDp(20f) else appleTVDp(24f)),
             ) {
                 Row(Modifier.focusGroup(), horizontalArrangement = Arrangement.spacedBy(appleTVDp(12f))) {
                     listOf("选集", "相关作品", "倍速", "清晰度").forEach { tab ->
