@@ -171,7 +171,7 @@ class MainActivity : ComponentActivity() {
                                 else -> null
                             }
                             if (detailState != null) {
-                                if (tvMode) DetailScreen(detailState, model, accountModel)
+                                if (tvMode) AppleTVPreparingScreen(detailState, model)
                                 else when (layout) {
                                     AppThemeStyle.IMMERSIVE -> ImmersiveDetail(detailState, model, accountModel)
                                     AppThemeStyle.CARDS -> CardsDetail(detailState, model, accountModel)
