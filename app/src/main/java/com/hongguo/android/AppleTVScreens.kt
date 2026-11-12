@@ -348,7 +348,12 @@ private fun AppleTVMine(
         )
         }
         if (qrBitmap != null) {
-            Box(Modifier.fillMaxSize().background(Color.Black), contentAlignment = Alignment.Center) {
+            Box(Modifier.fillMaxSize().background(Color.Black).onPreviewKeyEvent { event ->
+                if (event.type == KeyEventType.KeyUp && event.key == Key.Menu) {
+                    accountModel.cancelLogin()
+                    true
+                } else false
+            }, contentAlignment = Alignment.Center) {
                 Column(Modifier.padding(appleTVDp(48f)), horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(appleTVDp(24f))) {
                     Text("扫码登录", color = Color.White, fontSize = appleTVSp(22f), fontWeight = FontWeight.Bold)
