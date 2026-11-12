@@ -571,15 +571,12 @@ private fun TvDetailContent(state: HongguoUiState, model: HongguoViewModel) {
         if (detail != null) {
             Text("选集", color = TvText, fontSize = 20.sp, fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(top = 22.dp, bottom = 12.dp))
-            LazyVerticalGrid(columns = GridCells.Adaptive(112.dp), modifier = Modifier.fillMaxWidth().weight(1f)
-                .testTag("tv_episode_grid"),
-                contentPadding = PaddingValues(start = 4.dp, end = 12.dp, top = 4.dp, bottom = 28.dp),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
+            LazyVerticalGrid(columns = GridCells.Adaptive(76.dp), modifier = Modifier.fillMaxWidth().weight(1f),
+                contentPadding = PaddingValues(bottom = 20.dp), horizontalArrangement = Arrangement.spacedBy(10.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                itemsIndexed(detail.episodes, key = { index, episode -> "${episode.index}-$index" }) { index, episode ->
-                    TvAction("第${episode.index}集", onClick = { model.playEpisode(index) },
-                        modifier = Modifier.fillMaxWidth(), secondary = state.episodePosition == index,
-                        compact = true)
+                itemsIndexed(detail.episodes) { index, episode ->
+                    TvAction("第 " + episode.index + " 集", onClick = { model.playEpisode(index) },
+                        secondary = state.episodePosition == index)
                 }
             }
         }
@@ -593,19 +590,16 @@ private fun TvAction(
     modifier: Modifier = Modifier,
     secondary: Boolean = false,
     enabled: Boolean = true,
-    compact: Boolean = false,
 ) {
     var focused by remember { mutableStateOf(false) }
     Surface(onClick = onClick, enabled = enabled, shape = RoundedCornerShape(12.dp),
         color = when { focused -> TvPanelFocused; secondary -> TvPanel; else -> TvAccent },
         border = if (focused) BorderStroke(2.dp, Color.White) else null,
-        modifier = modifier.heightIn(min = 48.dp)
-            .then(if (compact) Modifier.widthIn(min = 0.dp) else Modifier.widthIn(min = 100.dp))
+        modifier = modifier.heightIn(min = 48.dp).widthIn(min = 100.dp)
             .onFocusChanged { focused = it.isFocused }) {
-        Box(Modifier.fillMaxWidth().padding(horizontal = if (compact) 6.dp else 18.dp, vertical = 10.dp),
-            contentAlignment = Alignment.Center) {
+        Box(Modifier.padding(horizontal = 18.dp, vertical = 10.dp), contentAlignment = Alignment.Center) {
             Text(label, color = if (secondary || focused) TvText else Color.White, fontSize = 14.sp,
-                fontWeight = FontWeight.Bold, maxLines = 1, softWrap = false)
+                fontWeight = FontWeight.Bold, maxLines = 1)
         }
     }
 }
