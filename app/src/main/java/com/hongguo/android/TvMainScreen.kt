@@ -264,11 +264,12 @@ private fun TvMainScreen(
                 state.tab == AppTab.SEARCH -> TvSearchContent(state, model)
                 state.tab == AppTab.MINE -> TvMineContent(state, model, updateState, updateModel,
                     accountName = accountName, accountStatus = accountStatus)
-                state.tab == AppTab.ACCOUNT -> AccountScreen(accountModel, onBack = model::closeAccount,
+                state.tab == AppTab.ACCOUNT -> TvAccountContent(accountModel, onBack = model::closeAccount,
                     onOpenLibrary = model::openLibrary)
-                state.tab == AppTab.SETTINGS -> SystemSettingsScreen(state, model, updateState, updateModel,
+                state.tab == AppTab.SETTINGS -> TvSettingsContent(state, updateState, updateModel,
+                    displayMode = displayMode, onDisplayMode = onDisplayMode,
                     onTheme = { model.selectTab(AppTab.THEME_STYLE) }, onBack = model::closeSettings,
-                    displayMode = displayMode, onDisplayMode = onDisplayMode)
+                    onAutoPlay = model::setAutoPlayNext, onPreload = model::setPreloadNext)
                 state.tab == AppTab.THEME_STYLE -> ThemeStyleScreen(state, model, model::closeThemeStyle)
                 state.tab == AppTab.PLAY_HISTORY -> PlayHistoryScreen(state, model, accountModel)
                 state.tab == AppTab.LOCAL_FAVORITES -> LocalFavoritesScreen(state, model)
@@ -703,6 +704,127 @@ private fun TvMineTile(title: String, count: String, action: String, onClick: ()
             Text(title, color = TvMuted, fontSize = 15.sp)
             Text(count, color = TvText, fontSize = 28.sp, fontWeight = FontWeight.Black)
             Text(action, color = if (focused) TvAccent else TvMuted, fontSize = 12.sp)
+        }
+    }
+}
+
+
+@Composable
+private fun TvAccountContent(
+    accountModel: AccountViewModel,
+    onBack: () -> Unit,
+    onOpenLibrary: (LibraryEntry) -> Unit,
+) {
+    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
+        Box(Modifier.fillMaxWidth().widthIn(max = 1120.dp).testTag("tv_account")) {
+            AccountScreen(accountModel, onBack = onBack, onOpenLibrary = onOpenLibrary)
+        }
+    }
+}
+
+@Composable
+private fun TvSettingsContent(
+    state: HongguoUiState,
+    updateState: UpdateUiState,
+    updateModel: UpdateViewModel,
+    displayMode: AppDisplayMode,
+    onDisplayMode: (AppDisplayMode) -> Unit,
+    onTheme: () -> Unit,
+    onBack: () -> Unit,
+    onAutoPlay: (Boolean) -> Unit,
+    onPreload: (Boolean) -> Unit,
+) {
+    LazyColumn(Modifier.fillMaxSize().padding(end = 18.dp).testTag("tv_settings"),
+        contentPadding = PaddingValues(bottom = 32.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
+        item {
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(18.dp)) {
+                TvAction("返回我的", onClick = onBack, secondary = true)
+                Text("设置", color = TvText, fontSize = 30.sp, fontWeight = FontWeight.Black)
+            }
+        }
+        item {
+            TvSettingsGroup("界面模式", "可自动识别设备，也可以手动切换手机或电视布局") {
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    AppDisplayMode.entries.forEach { mode ->
+                        TvSettingsChoice(mode.label, selected = displayMode == mode,
+                            modifier = Modifier.weight(1f)) { onDisplayMode(mode) }
+                    }
+                }
+            }
+        }
+        item {
+            TvSettingsGroup("外观", "当前主题：${state.themeStyle.label}") {
+                TvAction("选择主题样式", onClick = onTheme)
+            }
+        }
+        item {
+            TvSettingsGroup("播放偏好", "更改后立即生效") {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    TvSettingsToggle("自动连播下一集", "本集结束后自动播放下一集", state.autoPlayNext, onAutoPlay)
+                    TvSettingsToggle("下一集预加载", "提前准备少量内容，关闭可节省流量", state.preloadNext, onPreload)
+                }
+            }
+        }
+        item {
+            TvSettingsGroup("软件更新", "下载和安装新版本仍需用户确认") {
+                TvSettingsToggle("启动时检查更新", "每次重新启动应用时检查新版本",
+                    updateState.automaticChecksEnabled, updateModel::setAutomaticChecksEnabled)
+                if (updateState.checking) {
+                    Row(Modifier.padding(top = 10.dp), verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        CircularProgressIndicator(Modifier.size(18.dp), color = TvAccent, strokeWidth = 2.dp)
+                        Text("正在检查更新…", color = TvMuted, fontSize = 13.sp)
+                    }
+                } else {
+                    TvAction("立即检查更新", onClick = updateModel::checkForUpdates, secondary = true)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun TvSettingsGroup(title: String, subtitle: String, content: @Composable () -> Unit) {
+    Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(TvPanel).padding(20.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+            Text(title, color = TvText, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+            Text(subtitle, color = TvMuted, fontSize = 13.sp)
+        }
+        content()
+    }
+}
+
+@Composable
+private fun TvSettingsChoice(label: String, selected: Boolean, modifier: Modifier = Modifier, onClick: () -> Unit) {
+    var focused by remember { mutableStateOf(false) }
+    Surface(onClick = onClick, shape = RoundedCornerShape(12.dp),
+        color = when { focused -> TvPanelFocused; selected -> TvAccent.copy(alpha = .22f); else -> TvBackground },
+        border = BorderStroke(2.dp, when { focused -> TvAccent; selected -> TvAccent.copy(alpha = .65f); else -> TvMuted.copy(alpha = .25f) }),
+        modifier = modifier.heightIn(min = 64.dp).onFocusChanged { focused = it.isFocused }) {
+        Box(Modifier.padding(horizontal = 12.dp, vertical = 12.dp), contentAlignment = Alignment.Center) {
+            Text(label, color = TvText, fontSize = 16.sp,
+                fontWeight = if (selected || focused) FontWeight.Bold else FontWeight.Medium)
+        }
+    }
+}
+
+@Composable
+private fun TvSettingsToggle(title: String, subtitle: String, checked: Boolean, onClick: (Boolean) -> Unit) {
+    var focused by remember { mutableStateOf(false) }
+    Surface(onClick = { onClick(!checked) }, shape = RoundedCornerShape(12.dp),
+        color = if (focused) TvPanelFocused else TvBackground,
+        border = if (focused) BorderStroke(2.dp, TvAccent) else BorderStroke(1.dp, TvMuted.copy(alpha = .2f)),
+        modifier = Modifier.fillMaxWidth().heightIn(min = 76.dp).onFocusChanged { focused = it.isFocused }) {
+        Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(title, color = TvText, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                Text(subtitle, color = TvMuted, fontSize = 12.sp)
+            }
+            Text(if (checked) "已开启" else "已关闭", color = if (checked) TvAccent else TvMuted,
+                fontSize = 14.sp, fontWeight = FontWeight.Bold)
         }
     }
 }
