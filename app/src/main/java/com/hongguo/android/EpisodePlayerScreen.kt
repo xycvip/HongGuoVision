@@ -389,7 +389,7 @@ private fun EpisodePager(state: HongguoUiState, model: HongguoViewModel, detail:
                         verticalArrangement = Arrangement.spacedBy(14.dp)) {
                         Text(state.playbackError, color = Color.White, fontSize = 14.sp, lineHeight = 23.sp,
                             modifier = Modifier.testTag("media_status"))
-                        Button(onClick = model::retryPlayback, modifier = Modifier.testTag("retry_playback"), shape = RoundedCornerShape(13.dp)) { Text("重新播放") }
+                        Button(onClick = model::retryPlayback, modifier = Modifier.tvFocusVisual().testTag("retry_playback"), shape = RoundedCornerShape(13.dp)) { Text("重新播放") }
                     }
                     state.preparing || (activeVideo != null && playback.player == null) || (playback.isBuffering && playback.playWhenReady) -> {
                         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(13.dp)) {
@@ -400,7 +400,7 @@ private fun EpisodePager(state: HongguoUiState, model: HongguoViewModel, detail:
                         }
                     }
                     playback.player != null && (!playback.playWhenReady || playback.ended) -> {
-                        IconButton(onClick = togglePlayback, modifier = Modifier.size(76.dp).testTag("player_resume")
+                        IconButton(onClick = togglePlayback, modifier = Modifier.size(76.dp).tvFocusVisual().testTag("player_resume")
                             .semantics { contentDescription = if (playback.ended) "重新播放" else "继续播放" }) {
                             Surface(color = Color.Black.copy(alpha = .35f), shape = CircleShape) {
                                 Box(Modifier.size(66.dp), Alignment.Center) {
@@ -471,7 +471,7 @@ private fun EpisodePager(state: HongguoUiState, model: HongguoViewModel, detail:
                         lineHeight = 25.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, fontWeight = FontWeight.SemiBold)
                     Icon(Icons.Rounded.ChevronRight, null, tint = Color.White.copy(alpha = .8f), modifier = Modifier.size(22.dp))
                 }
-                TextButton(onClick = { showFavorites = true }, modifier = Modifier.testTag("player_favorite_options")
+                TextButton(onClick = { showFavorites = true }, modifier = Modifier.tvFocusVisual().testTag("player_favorite_options")
                     .semantics { contentDescription = "收藏选项" }) {
                     Icon(if (anyFavorite) Icons.Rounded.Star else Icons.Outlined.StarBorder, null,
                         tint = if (anyFavorite) Orange else Color.White, modifier = Modifier.size(24.dp))
@@ -507,7 +507,7 @@ private fun EpisodePager(state: HongguoUiState, model: HongguoViewModel, detail:
             Row(Modifier.fillMaxWidth().then(if (landscape) Modifier.offset(y = (-4).dp) else Modifier),
                 verticalAlignment = Alignment.CenterVertically) {
                 if (landscape) {
-                    IconButton(onClick = togglePlayback, enabled = playback.player != null, modifier = Modifier.testTag("player_play_pause")
+                    IconButton(onClick = togglePlayback, enabled = playback.player != null, modifier = Modifier.tvFocusVisual().testTag("player_play_pause")
                         .semantics { contentDescription = if (playback.playWhenReady && !playback.ended) "暂停" else "播放" }) {
                         Icon(if (playback.playWhenReady && !playback.ended) Icons.Rounded.Pause else Icons.Rounded.PlayArrow, null,
                             tint = Color.White, modifier = Modifier.size(28.dp))
@@ -520,7 +520,7 @@ private fun EpisodePager(state: HongguoUiState, model: HongguoViewModel, detail:
                 } else Text("${playerTime(displayedPosition)} / $durationLabel",
                     modifier = Modifier.testTag("player_time"), color = Color.White.copy(alpha = .9f), fontSize = 12.sp)
                 Spacer(Modifier.weight(1f))
-                TextButton(onClick = { showSpeed = !showSpeed }, modifier = Modifier.testTag("player_speed")
+                TextButton(onClick = { showSpeed = !showSpeed }, modifier = Modifier.tvFocusVisual().testTag("player_speed")
                     .onGloballyPositioned { speedAnchor = it.boundsInRoot() }
                     .semantics { contentDescription = "播放速度，当前${playbackSpeedLabel(state.playbackSpeed)}" }) {
                     Text("倍速 ${playbackSpeedLabel(state.playbackSpeed)}",
@@ -695,7 +695,7 @@ internal fun PlayerTopBar(
         .background(Brush.verticalGradient(listOf(Color.Black.copy(alpha = .48f), Color.Transparent)))
         .windowInsetsPadding(safeInsets).padding(start = 9.dp, end = 14.dp, top = if (title != null) 6.dp else 9.dp, bottom = 24.dp)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = onBack, modifier = Modifier.testTag("player_back")
+            IconButton(onClick = onBack, modifier = Modifier.tvFocusVisual().testTag("player_back")
                 .semantics { contentDescription = if (title != null) "退出全屏" else "返回详情" }) {
                 Icon(Icons.Rounded.ChevronLeft, null, tint = Color.White, modifier = Modifier.size(34.dp))
             }
@@ -726,7 +726,7 @@ internal fun PlayerTopBar(
                     tint = if (favorite) Orange else Color.White, modifier = Modifier.size(24.dp))
             }
             Box(Modifier.testTag("player_chapters")) {
-                TextButton(onClick = onShowEpisodes, modifier = Modifier.testTag("player_episode_picker")) {
+                TextButton(onClick = onShowEpisodes, modifier = Modifier.tvFocusVisual().testTag("player_episode_picker")) {
                     Text("选集", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Medium)
                     Icon(Icons.Rounded.ChevronRight, null, tint = Color.White, modifier = Modifier.size(21.dp))
                 }
