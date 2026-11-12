@@ -29,7 +29,7 @@ jobs:
       - name: 检出 TV 适配开发分支
         uses: actions/checkout@v4
         with:
-          ref: feature/tv-large-screen
+          ref: Android-TV
           fetch-depth: 0
 
       - name: 配置 JDK 17
