@@ -342,9 +342,10 @@ private fun AppleTVMine(
         )
         }
         if (qrBitmap != null) {
-            Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = .97f)), contentAlignment = Alignment.Center) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(appleTVDp(18f))) {
-                    Text("扫码登录", color = Color.White, fontSize = appleTVSp(30f), fontWeight = FontWeight.Bold)
+            Box(Modifier.fillMaxSize().background(Color.Black), contentAlignment = Alignment.Center) {
+                Column(Modifier.padding(appleTVDp(48f)), horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(appleTVDp(24f))) {
+                    Text("扫码登录", color = Color.White, fontSize = appleTVSp(22f), fontWeight = FontWeight.Bold)
                     Image(qrBitmap, contentDescription = "红果账号登录二维码", modifier = Modifier.width(appleTVDp(480f)).height(appleTVDp(480f)))
                     Text(accountState.message?.takeIf { it.isNotBlank() } ?: "请使用手机红果扫描二维码", color = Color.White.copy(alpha = .8f), fontSize = appleTVSp(16f))
                     if (accountState.qrRemainingSeconds > 0) {
