@@ -245,23 +245,27 @@ internal fun AppleTVPlayerScreen(
                 Spacer(Modifier.height(appleTVDp(18f)))
                 when (infoTab) {
                     "选集" -> {
-                        targetEpisode = targetEpisode.coerceIn(detail.episodes.indices)
-                        Text("第 ${targetEpisode + 1} 集 / 共 ${detail.episodes.size} 集",
-                            color = Color.White, fontSize = appleTVSp(22f), fontWeight = FontWeight.Bold)
-                        Spacer(Modifier.height(appleTVDp(14f)))
-                        Row(Modifier.focusGroup(), horizontalArrangement = Arrangement.spacedBy(appleTVDp(12f)), verticalAlignment = Alignment.CenterVertically) {
-                            AppleTVControl("−10") { targetEpisode = (targetEpisode - 10).coerceAtLeast(0) }
-                            AppleTVControl("−1") { targetEpisode = (targetEpisode - 1).coerceAtLeast(0) }
-                            AppleTVControl("${detail.episodes[targetEpisode].index}") { }
-                            AppleTVControl("+1") { targetEpisode = (targetEpisode + 1).coerceAtMost(detail.episodes.lastIndex) }
-                            AppleTVControl("+10") { targetEpisode = (targetEpisode + 10).coerceAtMost(detail.episodes.lastIndex) }
-                            if (targetEpisode == state.episodePosition) {
-                                Text("正在播放", color = AppleTVColors.secondary, fontSize = appleTVSp(16f), fontWeight = FontWeight.SemiBold)
-                            } else {
-                                AppleTVControl("播放该集", icon = androidx.compose.material.icons.Icons.Outlined.PlayArrow,
-                                    paddingH = 16.dp, paddingV = 8.dp) {
-                                    model.playEpisode(targetEpisode)
-                                    showInfo = false
+                        if (detail.episodes.isEmpty()) {
+                            Text("暂无剧集", color = Color.White.copy(alpha = .7f), fontSize = appleTVSp(16f))
+                        } else {
+                            val selectedEpisode = targetEpisode.coerceIn(0, detail.episodes.lastIndex)
+                            Text("第 ${selectedEpisode + 1} 集 / 共 ${detail.episodes.size} 集",
+                                color = Color.White, fontSize = appleTVSp(22f), fontWeight = FontWeight.Bold)
+                            Spacer(Modifier.height(appleTVDp(14f)))
+                            Row(Modifier.focusGroup(), horizontalArrangement = Arrangement.spacedBy(appleTVDp(12f)), verticalAlignment = Alignment.CenterVertically) {
+                                AppleTVControl("−10") { targetEpisode = (selectedEpisode - 10).coerceAtLeast(0) }
+                                AppleTVControl("−1") { targetEpisode = (selectedEpisode - 1).coerceAtLeast(0) }
+                                AppleTVControl("${detail.episodes[selectedEpisode].index}") { }
+                                AppleTVControl("+1") { targetEpisode = (selectedEpisode + 1).coerceAtMost(detail.episodes.lastIndex) }
+                                AppleTVControl("+10") { targetEpisode = (selectedEpisode + 10).coerceAtMost(detail.episodes.lastIndex) }
+                                if (selectedEpisode == state.episodePosition) {
+                                    Text("正在播放", color = AppleTVColors.secondary, fontSize = appleTVSp(16f), fontWeight = FontWeight.SemiBold)
+                                } else {
+                                    AppleTVControl("播放该集", icon = androidx.compose.material.icons.Icons.Outlined.PlayArrow,
+                                        paddingH = 16.dp, paddingV = 8.dp) {
+                                        model.playEpisode(selectedEpisode)
+                                        showInfo = false
+                                    }
                                 }
                             }
                         }
