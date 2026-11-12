@@ -22,8 +22,8 @@ android {
         targetSdk = 36
         versionCode = providers.gradleProperty("appVersionCode").orElse("1").get().toInt()
         versionName = providers.gradleProperty("appVersionName").orElse("0.0.1").get()
-        buildConfigField("String", "UPDATE_REPOSITORY", "\"OOIUa/hongguo-android\"")
-        buildConfigField("String", "UPDATE_MANIFEST_URL", "\"https://github.com/OOIUa/hongguo-android/releases/latest/download/update.json\"")
+        buildConfigField("String", "UPDATE_REPOSITORY", "\"xycvip/HongGuoVision\"")
+        buildConfigField("String", "UPDATE_MANIFEST_URL", "\"https://github.com/xycvip/HongGuoVision/releases/latest/download/update.json\"")
         testInstrumentationRunner = "com.hongguo.android.HongguoTestRunner"
     }
     signingConfigs {
