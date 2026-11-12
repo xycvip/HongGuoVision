@@ -56,10 +56,8 @@ internal fun appleTVSp(points: Float): TextUnit =
     (points * androidx.compose.ui.platform.LocalConfiguration.current.screenHeightDp / 1080f).sp
 
 @Composable
-internal fun appleTVLibraryCanvasHeight(): Dp {
-    val screenHeight = androidx.compose.ui.platform.LocalConfiguration.current.screenHeightDp.dp
-    return screenHeight - AppleTVLayout.height(AppleTVLayout.NAV_VH, screenHeight) - 1.dp
-}
+internal fun appleTVLibraryCanvasHeight(): Dp =
+    androidx.compose.ui.platform.LocalConfiguration.current.screenHeightDp.dp
 
 internal object AppleTVLayout {
     const val NAV_VH = 0.085f
