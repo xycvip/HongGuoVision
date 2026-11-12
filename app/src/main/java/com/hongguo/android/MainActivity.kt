@@ -2,6 +2,8 @@ package com.hongguo.android
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import android.content.res.Configuration
+import android.content.pm.PackageManager
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
@@ -58,6 +60,8 @@ import com.hongguo.account.AccountViewModel
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val tvMode = packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)
+        if (tvMode) requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
         applyThemeWindow(storedThemePalette())
         setContent {
             val model: HongguoViewModel = viewModel()
@@ -73,6 +77,7 @@ class MainActivity : ComponentActivity() {
             val statusBarOverPicture = state.selectedCard != null && layout != AppThemeStyle.WARM && detailPictureUnderBar
             // The player owns the system bars while open; the theme re-applies them when it closes.
             HongguoTheme(layout, dark = dark, windowDark = dark || feedDark, statusBarOverPicture = statusBarOverPicture, applyToWindow = !state.playerOpen) {
+                CompositionLocalProvider(LocalTvMode provides tvMode) {
                 CompositionLocalProvider(LocalDetailPictureUnderBar provides { detailPictureUnderBar = it }) {
                 val pageStates = rememberSaveableStateHolder()
                 val accountModel: AccountViewModel = viewModel()
@@ -233,6 +238,7 @@ class MainActivity : ComponentActivity() {
                 }
                 // A startup update prompt waits until the theme picker has been answered, so two dialogs never stack.
                 UpdateDialogs(updateState, updateModel, this@MainActivity, deferred = state.themeOnboardingPending)
+                }
                 }
             }
         }
