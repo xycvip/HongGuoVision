@@ -76,7 +76,7 @@ internal fun RankScreen(state: HongguoUiState, model: HongguoViewModel) {
     }
 }
 
-internal fun RankEntry.toCard() = DramaCard(series.id, series.title, series.cover, episodeCount, series.description)
+internal fun RankEntry.toCard() = DramaCard(series.id, series.title, series.cover, episodeCount, series.description, series.badge)
 
 @Composable
 private fun RankRow(entry: RankEntry, onOpen: () -> Unit) {
