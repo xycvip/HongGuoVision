@@ -55,6 +55,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.focusGroup
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.onPreviewKeyEvent
@@ -91,6 +92,7 @@ internal fun AppleTVLibraryScreen(
     val rankFocus = androidx.compose.runtime.remember { FocusRequester() }
     val mineFocus = androidx.compose.runtime.remember { FocusRequester() }
     val searchFocus = androidx.compose.runtime.remember { FocusRequester() }
+    val keyboardController = LocalSoftwareKeyboardController.current
     Column(Modifier.fillMaxSize().background(AppleTVColors.background).onPreviewKeyEvent { event ->
         if (event.type == KeyEventType.KeyUp && event.key == Key.Menu &&
             accountState.qrBytes == null && state.tab != AppTab.HOME) {
@@ -122,7 +124,7 @@ internal fun AppleTVLibraryScreen(
                 singleLine = true,
                 textStyle = TextStyle(color = Color.White, fontSize = appleTVSp(16f)),
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                keyboardActions = KeyboardActions(onSearch = { model.search() }),
+                keyboardActions = KeyboardActions(onSearch = { keyboardController?.hide(); model.search() }),
                 decorationBox = { inner ->
                     Box(contentAlignment = Alignment.CenterStart) {
                         if (state.query.isEmpty()) Text("搜索剧名", color = AppleTVColors.secondary, fontSize = appleTVSp(16f))
