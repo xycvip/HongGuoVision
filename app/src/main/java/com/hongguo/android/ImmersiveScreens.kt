@@ -292,7 +292,7 @@ private fun ImmersiveFeedPage(card: DramaCard, page: Int, favorite: Boolean, mod
 @Composable
 private fun RailAction(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, tint: Color = Color.White,
                        tag: String, onClick: () -> Unit) {
-    Column(Modifier.widthIn(min = 52.dp).clip(RoundedCornerShape(12.dp)).clickable(role = Role.Button, onClick = onClick)
+    Column(Modifier.widthIn(min = 52.dp).clip(RoundedCornerShape(12.dp)).tvFocusVisual().clickable(role = Role.Button, onClick = onClick)
         .testTag(tag).padding(6.dp),
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(3.dp)) {
         Icon(icon, null, tint = tint, modifier = Modifier.size(32.dp))
@@ -351,7 +351,7 @@ internal fun ImmersiveTheater(state: HongguoUiState, model: HongguoViewModel) {
                 Column(Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 10.dp)) {
                     Text("热播榜", color = Ink, fontSize = 17.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 4.dp))
                     ranked.forEachIndexed { index, card ->
-                        Row(Modifier.fillMaxWidth().clickable { model.openDrama(card) }.padding(vertical = 8.dp)
+                        Row(Modifier.fillMaxWidth().tvFocusVisual().clickable { model.openDrama(card) }.padding(vertical = 8.dp)
                             .testTag("theater_rank_$index"),
                             verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                             Text("${index + 1}", color = if (LocalHongguoPalette.current.isDark) listOf(AccentInk, Color(0xFFFFB35C), Gold)[index] else AccentInk, fontSize = 24.sp,
@@ -381,7 +381,7 @@ internal fun ImmersiveTheater(state: HongguoUiState, model: HongguoViewModel) {
             Text("全部剧集", color = Ink, fontSize = 17.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 4.dp))
         }
         itemsIndexed(items.drop(3), key = { _, card -> card.id }) { index, card ->
-            Column(Modifier.animateItem().clickable(role = Role.Button) { model.openDrama(card) }.testTag("theater_result_${index + 3}"),
+            Column(Modifier.animateItem().tvFocusVisual().clickable(role = Role.Button) { model.openDrama(card) }.testTag("theater_result_${index + 3}"),
                 verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Cover(card.cover, card.title, Modifier.fillMaxWidth().aspectRatio(.75f))
                 Text(card.title, color = Ink, fontSize = 13.sp, lineHeight = 18.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
@@ -514,7 +514,7 @@ internal fun ImmersiveLibrary(state: HongguoUiState, model: HongguoViewModel, ac
             items(state.favorites.chunked(3), key = { row -> row.first().card.id }) { row ->
                 Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     row.forEach { entry ->
-                        Column(Modifier.weight(1f).clickable { model.openLibrary(entry) }.testTag("immersive_favorite_${entry.card.id}"),
+                        Column(Modifier.weight(1f).tvFocusVisual().clickable { model.openLibrary(entry) }.testTag("immersive_favorite_${entry.card.id}"),
                             verticalArrangement = Arrangement.spacedBy(6.dp)) {
                             Box(Modifier.fillMaxWidth().aspectRatio(.75f).clip(RoundedCornerShape(10.dp))) {
                                 PosterImage(entry.card.cover, Modifier.fillMaxSize())
