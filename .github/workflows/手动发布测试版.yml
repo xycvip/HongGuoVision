@@ -133,7 +133,11 @@ jobs:
         run: |
           set -uo pipefail
 
-          APK="app/build/outputs/apk/release/app-release.apk"
+          APK_DIR="app/build/outputs/apk/release"
+          APK=""
+          if [[ -d "$APK_DIR" ]]; then
+            APK="$(find "$APK_DIR" -maxdepth 1 -type f -name '*.apk' ! -name '*unsigned*' -print | sort | head -n 1)"
+          fi
           ERRORS=()
           EXPECTED_PACKAGE="com.x.hgvision"
           EXPECTED_VERSION_CODE="${{ steps.version.outputs.version_code }}"
@@ -141,8 +145,10 @@ jobs:
           EXPECTED_FINGERPRINT="$(tr -d '[:space:]:' < release-signing.sha256 | tr '[:upper:]' '[:lower:]')"
 
           echo "========== APK 发布前校验 =========="
-          if [[ ! -s "$APK" ]]; then
-            echo "::error::APK 文件不存在或为空：$APK"
+          if [[ -z "$APK" || ! -s "$APK" ]]; then
+            echo "::error::Release 目录中没有找到 APK：$APK_DIR"
+            echo "实际构建输出目录："
+            find app/build/outputs -maxdepth 5 -type f -print 2>/dev/null | sort || true
             exit 1
           fi
           echo "APK 文件：$APK"
