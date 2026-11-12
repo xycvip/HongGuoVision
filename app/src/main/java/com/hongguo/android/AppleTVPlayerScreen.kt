@@ -34,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.focusGroup
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
@@ -60,6 +61,10 @@ import com.hongguo.account.AccountState
 /** Short transition while the selected work and first stream are being prepared. */
 @Composable
 internal fun AppleTVPreparingScreen(state: HongguoUiState, model: HongguoViewModel) {
+    val retryFocus = remember { FocusRequester() }
+    androidx.compose.runtime.LaunchedEffect(state.detailError) {
+        if (state.detailError != null) runCatching { retryFocus.requestFocus() }
+    }
     Box(Modifier.fillMaxSize().background(Color.Black), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(appleTVDp(16f))) {
             if (state.detailError == null) {
@@ -69,7 +74,7 @@ internal fun AppleTVPreparingScreen(state: HongguoUiState, model: HongguoViewMod
             } else {
                 Text(state.selectedCard?.title.orEmpty(), color = Color.White, fontSize = appleTVSp(24f), fontWeight = FontWeight.Bold)
                 Text(state.detailError.orEmpty(), color = Color.White.copy(alpha = .72f), fontSize = appleTVSp(16f))
-                AppleTVControl("重试", onClick = model::retryDetails)
+                AppleTVControl("重试", modifier = Modifier.focusRequester(retryFocus), onClick = model::retryDetails)
             }
         }
     }
