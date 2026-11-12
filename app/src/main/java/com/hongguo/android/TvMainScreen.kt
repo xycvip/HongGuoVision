@@ -119,7 +119,9 @@ internal class TvActivity : ComponentActivity() {
                             AccountSessionStatus.LOGGED_IN -> "查看账号收藏、历史与预约"
                             AccountSessionStatus.NEEDS_VERIFICATION -> "已保存账号，等待重新验证"
                             else -> "登录后查看手机片单"
-                        })
+                        },
+                        displayMode = this@TvActivity.currentDisplayMode(),
+                        onDisplayMode = { mode -> this@TvActivity.switchDisplayMode(mode) })
                 }
                 UpdateDialogs(updateState, updateModel, this@TvActivity)
             }
@@ -225,6 +227,8 @@ private fun TvMainScreen(
     accountName: String?,
     accountAvatar: String?,
     accountStatus: String,
+    displayMode: AppDisplayMode,
+    onDisplayMode: (AppDisplayMode) -> Unit,
 ) {
     BackHandler(enabled = state.selectedCard != null || state.tab != AppTab.HOME) {
         when {
@@ -257,7 +261,7 @@ private fun TvMainScreen(
                     onOpenLibrary = model::openLibrary)
                 state.tab == AppTab.SETTINGS -> SystemSettingsScreen(state, model, updateState, updateModel,
                     onTheme = { model.selectTab(AppTab.THEME_STYLE) }, onBack = model::closeSettings,
-                    displayMode = currentDisplayMode(), onDisplayMode = { mode -> switchDisplayMode(mode) })
+                    displayMode = displayMode, onDisplayMode = onDisplayMode)
                 state.tab == AppTab.THEME_STYLE -> ThemeStyleScreen(state, model, model::closeThemeStyle)
                 state.tab == AppTab.PLAY_HISTORY -> PlayHistoryScreen(state, model, accountModel)
                 state.tab == AppTab.LOCAL_FAVORITES -> LocalFavoritesScreen(state, model)
