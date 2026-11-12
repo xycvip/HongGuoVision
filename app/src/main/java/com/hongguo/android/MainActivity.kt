@@ -11,6 +11,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -134,6 +135,7 @@ class MainActivity : ComponentActivity() {
                     val backdrop = rememberGlassBackdrop()
                     val navClearance = if (floatingNav) floatingNavClearance() else 0.dp
                     Scaffold(containerColor = Canvas,
+                        contentWindowInsets = if (tvMode) WindowInsets(0, 0, 0, 0) else ScaffoldDefaults.contentWindowInsets,
                         snackbarHost = { SnackbarHost(snackbar, Modifier.testTag("app_snackbar")
                             .padding(bottom = if (floatingNav) 76.dp else 0.dp)) }, bottomBar = {
                         if (!tvMode && showNav && !floatingNav) HongguoTheme(layout, dark = dark || feedDark, applyToWindow = false) {
