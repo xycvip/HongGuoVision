@@ -302,6 +302,6 @@ internal fun Modifier.quietSelectable(selected: Boolean, role: Role = Role.Tab, 
     val source = remember { MutableInteractionSource() }
     val pressed by source.collectIsPressedAsState()
     val dim by animateFloatAsState(if (pressed) .55f else 1f, tween(if (pressed) 60 else 160), label = "tab_press")
-    this.selectable(selected = selected, interactionSource = source, indication = null, role = role, onClick = onClick)
+    this.tvFocusVisual().selectable(selected = selected, interactionSource = source, indication = null, role = role, onClick = onClick)
         .graphicsLayer { alpha = dim }
 }
