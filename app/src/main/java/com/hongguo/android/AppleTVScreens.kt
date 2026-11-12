@@ -176,7 +176,7 @@ private fun AppleTVHome(state: HongguoUiState, model: HongguoViewModel) {
         canvasHeight = appleTVLibraryCanvasHeight(),
         status = state.home.error ?: if (state.home.loading) "正在加载…" else "共 ${state.home.items.size} 部",
         emptyText = "看看下一部好故事",
-        emptyIcon = Icons.Outlined.PlayCircleOutline,
+        emptyIcon = Icons.Outlined.SmartDisplay,
         filterSpacing = 16.dp,
         filters = {
             feeds.forEach { (feed, label) ->
