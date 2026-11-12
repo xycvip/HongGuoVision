@@ -375,13 +375,19 @@ private fun TvHomeContent(state: HongguoUiState, model: HongguoViewModel) {
                     val columns = ((maxWidth + 14.dp) / 174.dp).toInt().coerceAtLeast(2)
                     val rows = cards.chunked(columns)
                     Column(verticalArrangement = Arrangement.spacedBy(18.dp)) {
-                        rows.forEach { rowCards ->
+                        rows.forEachIndexed { rowIndex, rowCards ->
                             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-                                rowCards.forEach { card ->
+                                rowCards.forEachIndexed { cardIndex, card ->
+                                    val cardIndexInFeed = rowIndex * columns + cardIndex
                                     TvPosterCard(card,
-                                        if (card.episodeCount > 0) "全 ${card.episodeCount} 集" else "短剧",
+                                        if (card.episodeCount > 0) "全 " + card.episodeCount + " 集" else "短剧",
                                         onClick = { model.openDrama(card) },
-                                        modifier = Modifier.weight(1f))
+                                        modifier = Modifier.weight(1f),
+                                        onFocused = {
+                                            if (cardIndexInFeed >= (cards.size - columns * 2).coerceAtLeast(0)) {
+                                                model.loadMoreHome()
+                                            }
+                                        })
                                 }
                                 repeat(columns - rowCards.size) { Spacer(Modifier.weight(1f)) }
                             }
@@ -401,9 +407,6 @@ private fun TvHomeContent(state: HongguoUiState, model: HongguoViewModel) {
             TvPosterRail("我的收藏", state.favorites.map { it.card }, onClick = { card ->
                 state.favorites.firstOrNull { it.card.id == card.id }?.let(model::openLibrary)
             })
-        }
-        if (state.home.hasMore) item {
-            TvAction(if (state.home.loadingMore) "正在加载…" else "加载更多", onClick = model::loadMoreHome)
         }
     }
 }
@@ -430,13 +433,17 @@ private fun TvPosterCard(
     subtitle: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier.width(142.dp),
+    onFocused: () -> Unit = {},
 ) {
     var focused by remember { mutableStateOf(false) }
     val scale by animateFloatAsState(if (focused) 1.055f else 1f, label = "tv_poster_scale")
     Column(modifier.graphicsLayer(scaleX = scale, scaleY = scale)
         .clip(RoundedCornerShape(13.dp))
         .background(if (focused) TvPanelFocused else Color.Transparent)
-        .clickable(onClick = onClick).onFocusChanged { focused = it.isFocused }
+        .clickable(onClick = onClick).onFocusChanged {
+            focused = it.isFocused
+            if (it.isFocused) onFocused()
+        }
         .border(BorderStroke(2.dp, if (focused) TvAccent else Color.Transparent), RoundedCornerShape(13.dp)).padding(5.dp).testTag("tv_card_" + card.id),
         verticalArrangement = Arrangement.spacedBy(7.dp)) {
         PosterImage(card.cover, Modifier.fillMaxWidth().aspectRatio(.72f).clip(RoundedCornerShape(10.dp)))
@@ -462,12 +469,15 @@ private fun TvCategoryContent(state: HongguoUiState, model: HongguoViewModel) {
             LazyVerticalGrid(columns = GridCells.Adaptive(150.dp), modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(8.dp), horizontalArrangement = Arrangement.spacedBy(18.dp),
                 verticalArrangement = Arrangement.spacedBy(18.dp)) {
-                itemsIndexed(state.category.items, key = { _, card -> card.id }) { _, card ->
-                    TvPosterCard(card, if (card.episodeCount > 0) "全 " + card.episodeCount + " 集" else "短剧") {
-                        model.openDrama(card)
-                    }
+                itemsIndexed(state.category.items, key = { _, card -> card.id }) { index, card ->
+                    TvPosterCard(card, if (card.episodeCount > 0) "全 ${card.episodeCount} 集" else "短剧",
+                        onClick = { model.openDrama(card) },
+                        onFocused = {
+                            if (index >= (state.category.items.size - 10).coerceAtLeast(0)) {
+                                model.loadMoreBrowse()
+                            }
+                        })
                 }
-                if (state.category.hasMore) item { TvAction("加载更多", onClick = model::loadMoreBrowse) }
             }
         }
     }
