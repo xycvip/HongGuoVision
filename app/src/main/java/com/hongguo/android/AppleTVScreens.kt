@@ -302,7 +302,7 @@ private fun AppleTVMine(
     val qrBitmap = remember(accountState.qrBytes) {
         accountState.qrBytes?.let { bytes -> runCatching { BitmapFactory.decodeByteArray(bytes, 0, bytes.size)?.asImageBitmap() }.getOrNull() }
     }
-    BackHandler(enabled = qrBitmap != null) { accountModel.cancelLogin() }
+    BackHandler(enabled = accountState.qrBytes != null) { accountModel.cancelLogin() }
     LaunchedEffect(qrBitmap, cloud) {
         if (qrBitmap != null) runCatching { qrFocus.requestFocus() }
         else if (!cloud) runCatching { loginFocus.requestFocus() }
