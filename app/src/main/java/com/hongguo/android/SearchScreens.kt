@@ -67,18 +67,18 @@ internal fun SearchScreen(state: HongguoUiState, model: HongguoViewModel, trendi
     val submit = { keyboard?.hide(); focus.clearFocus(); model.search() }
     val close = { keyboard?.hide(); focus.clearFocus(); model.closeSearch() }
     BackHandler(enabled = LocalPageActive.current, onBack = close)
-    Column(Modifier.fillMaxSize().padding(horizontal = 20.dp).testTag("search_screen")) {
+    Column(Modifier.fillMaxSize().padding(horizontal = 20.dp).tvFocusVisual().testTag("search_screen")) {
         Row(Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 16.dp),
             verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            IconButton(onClick = close, modifier = Modifier.testTag("search_back")) {
+            IconButton(onClick = close, modifier = Modifier.tvFocusVisual().testTag("search_back")) {
                 Icon(Icons.AutoMirrored.Outlined.ArrowBack, "返回", tint = Ink)
             }
             OutlinedTextField(value = state.query, onValueChange = model::updateQuery,
-                modifier = Modifier.weight(1f).testTag("search_input"),
+                modifier = Modifier.weight(1f).tvFocusVisual().testTag("search_input"),
                 placeholder = { Text("搜索剧名或关键词", fontSize = 15.sp, maxLines = 1, overflow = TextOverflow.Ellipsis) },
                 textStyle = TextStyle(fontSize = 16.sp, lineHeight = 24.sp, color = Ink),
                 trailingIcon = if (state.query.isNotEmpty()) {
-                    { IconButton(onClick = { model.updateQuery("") }, modifier = Modifier.testTag("search_clear")) {
+                    { IconButton(onClick = { model.updateQuery("") }, modifier = Modifier.tvFocusVisual().testTag("search_clear")) {
                         Icon(Icons.Outlined.Close, "清空搜索词", tint = Muted)
                     } }
                 } else null,
@@ -89,10 +89,10 @@ internal fun SearchScreen(state: HongguoUiState, model: HongguoViewModel, trendi
                 keyboardActions = KeyboardActions(onSearch = { submit() }))
             Button(onClick = submit, enabled = state.query.isNotBlank(), shape = RoundedCornerShape(12.dp),
                 contentPadding = PaddingValues(horizontal = 14.dp, vertical = 12.dp),
-                modifier = Modifier.heightIn(min = 48.dp).testTag("search_button")) { Text("搜索", fontSize = 14.sp) }
+                modifier = Modifier.heightIn(min = 48.dp).tvFocusVisual().testTag("search_button")) { Text("搜索", fontSize = 14.sp) }
         }
         if (state.suggestions.isNotEmpty() && !state.searching) {
-            Column(Modifier.fillMaxWidth().padding(bottom = 12.dp).testTag("search_suggestions")) {
+            Column(Modifier.fillMaxWidth().padding(bottom = 12.dp).tvFocusVisual().testTag("search_suggestions")) {
                 state.suggestions.forEach { suggestion ->
                     Row(Modifier.fillMaxWidth().clickable(role = Role.Button) {
                         keyboard?.hide(); focus.clearFocus(); model.pickSuggestion(suggestion)
@@ -108,7 +108,7 @@ internal fun SearchScreen(state: HongguoUiState, model: HongguoViewModel, trendi
             Row(Modifier.fillMaxWidth().padding(bottom = 12.dp), verticalAlignment = Alignment.CenterVertically) {
                 CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
                 Text("正在寻找相关短剧…", Modifier.padding(start = 12.dp).weight(1f), color = Muted, fontSize = 14.sp)
-                TextButton(onClick = model::cancelSearch, modifier = Modifier.testTag("search_cancel")) { Text("取消", fontSize = 14.sp) }
+                TextButton(onClick = model::cancelSearch, modifier = Modifier.tvFocusVisual().testTag("search_cancel")) { Text("取消", fontSize = 14.sp) }
             }
         } else if (state.searchedQuery.isNotEmpty()) {
             Row(Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 12.dp), verticalAlignment = Alignment.CenterVertically,
@@ -122,7 +122,7 @@ internal fun SearchScreen(state: HongguoUiState, model: HongguoViewModel, trendi
         LoadAheadEffect(FeedState(items = state.results, loading = state.searching, loadingMore = state.loadingMore,
             hasMore = state.hasMore, error = state.searchError), { list.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: -1 },
             { list.layoutInfo.totalItemsCount }, state.selectedCard == null, model::loadMore)
-        LazyColumn(Modifier.fillMaxWidth().weight(1f).testTag("search_results"), state = list,
+        LazyColumn(Modifier.fillMaxWidth().weight(1f).tvFocusVisual().testTag("search_results"), state = list,
             contentPadding = PaddingValues(bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             if (state.results.isEmpty() && !state.searching && state.searchError == null &&
                 state.searchedQuery.isBlank() && trending.isNotEmpty()) {
@@ -150,7 +150,7 @@ internal fun SearchScreen(state: HongguoUiState, model: HongguoViewModel, trendi
 
 @Composable
 internal fun DramaResult(card: DramaCard, index: Int, tag: String = "result_$index", onClick: () -> Unit) {
-    Card(onClick = onClick, modifier = Modifier.fillMaxWidth().testTag(tag),
+    Card(onClick = onClick, modifier = Modifier.fillMaxWidth().tvFocusVisual().testTag(tag),
         shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = Color.Transparent)) {
         Row(Modifier.fillMaxWidth().padding(vertical = 10.dp), horizontalArrangement = Arrangement.spacedBy(14.dp)) {
             Cover(card.cover, card.title, Modifier.width(80.dp).height(108.dp))
@@ -184,7 +184,7 @@ internal fun FailurePanel(message: String, onRetry: () -> Unit, tag: String = "r
         Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(message, modifier = Modifier.weight(1f), color = NoticeText, fontSize = 14.sp, lineHeight = 22.sp)
-            TextButton(onClick = onRetry, modifier = Modifier.testTag(tag)) { Text("重试", fontSize = 14.sp) }
+            TextButton(onClick = onRetry, modifier = Modifier.tvFocusVisual().testTag(tag)) { Text("重试", fontSize = 14.sp) }
         }
     }
 }
