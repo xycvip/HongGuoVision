@@ -24,6 +24,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -211,6 +212,14 @@ internal fun AppleTVPlayerScreen(
                 },
                 valueRange = 0f..1f,
                 enabled = playback.player != null && playback.durationMs > 0,
+                colors = SliderDefaults.colors(
+                    thumbColor = Color.White,
+                    activeTrackColor = Color.White,
+                    inactiveTrackColor = Color.White.copy(alpha = .28f),
+                    disabledThumbColor = Color.White.copy(alpha = .3f),
+                    disabledActiveTrackColor = Color.White.copy(alpha = .25f),
+                    disabledInactiveTrackColor = Color.White.copy(alpha = .12f),
+                ),
             )
             Row(Modifier.focusGroup(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(appleTVDp(14f))) {
                 Text(formatTVTime(if (dragging) (seekValue * playback.durationMs).toLong() else playback.positionMs),
