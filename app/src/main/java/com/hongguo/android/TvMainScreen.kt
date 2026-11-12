@@ -14,7 +14,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -125,12 +124,15 @@ internal class TvActivity : ComponentActivity() {
 @Composable
 private fun TvPlayerScreen(state: HongguoUiState, model: HongguoViewModel) {
     val detail = state.detail ?: return
+    if (detail.episodes.isEmpty()) return
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     val selected = state.episodePosition.coerceIn(detail.episodes.indices)
     val episode = detail.episodes[selected]
     val playback = rememberVideoPlayback(state.video, state.resumePositionMs, model,
         enabled = true, playbackSpeed = state.playbackSpeed)
     var showEpisodes by rememberSaveable(detail.id) { mutableStateOf(false) }
+    val firstControl = remember(detail.id) { FocusRequester() }
+    LaunchedEffect(detail.id) { runCatching { firstControl.requestFocus() } }
 
     DisposableEffect(lifecycle, model) {
         val observer = LifecycleEventObserver { _, event ->
@@ -173,7 +175,7 @@ private fun TvPlayerScreen(state: HongguoUiState, model: HongguoViewModel) {
                 modifier = Modifier.fillMaxWidth()
             )
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
-                TvAction("返回详情", onClick = model::closePlayer, secondary = true)
+                TvAction("返回详情", onClick = model::closePlayer, modifier = Modifier.focusRequester(firstControl), secondary = true)
                 TvAction("上一集", onClick = { model.playEpisode(selected - 1) }, enabled = selected > 0, secondary = true)
                 TvAction(if (playback.isPlaying) "暂停" else "继续播放", onClick = {
                     playback.player?.let { player ->
