@@ -17,8 +17,21 @@ android {
         buildConfigField("String", "UPDATE_MANIFEST_URL", "\"https://github.com/xycvip/HongGuoVision/releases/latest/download/update.json\"")
         testInstrumentationRunner = "com.hongguo.android.HongguoTestRunner"
     }
+    signingConfigs {
+        create("release") {
+            storeFile = file(System.getenv("SIGNING_KEYSTORE_PATH")
+                ?: error("缺少 SIGNING_KEYSTORE_PATH，不能生成未签名 Release"))
+            storePassword = System.getenv("SIGNING_STORE_PASSWORD")
+                ?: error("缺少 SIGNING_STORE_PASSWORD")
+            keyAlias = System.getenv("SIGNING_KEY_ALIAS")
+                ?: error("缺少 SIGNING_KEY_ALIAS")
+            keyPassword = System.getenv("SIGNING_KEY_PASSWORD")
+                ?: error("缺少 SIGNING_KEY_PASSWORD")
+        }
+    }
     buildTypes {
         release {
+            signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = false
         }
     }
