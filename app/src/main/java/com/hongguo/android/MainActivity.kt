@@ -102,6 +102,12 @@ class MainActivity : ComponentActivity() {
                 val updateState by updateModel.state.collectAsStateWithLifecycle()
                 val signedIn = accountState.sessionStatus == AccountSessionStatus.LOGGED_IN
                 LaunchedEffect(signedIn) { model.onAccountSession(signedIn) }
+                LaunchedEffect(tvMode, state.themeOnboardingPending) {
+                    if (tvMode && state.themeOnboardingPending) {
+                        model.completeThemeOnboarding(null)
+                        model.consumeThemeHint()
+                    }
+                }
                 BackHandler(enabled = state.playerOpen || state.selectedCard != null || state.tab != AppTab.HOME) {
                     when {
                         state.playerOpen -> if (tvMode) model.closePlayerToLibrary() else model.closePlayer()
