@@ -120,13 +120,13 @@ internal fun AccountScreen(
     }
 
     LazyColumn(
-        modifier = Modifier.fillMaxSize().testTag("account_screen"),
+        modifier = Modifier.fillMaxSize().tvFocusVisual().testTag("account_screen"),
         contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = { accountModel.cancelLogin(); onBack() }, modifier = Modifier.testTag("account_back")) {
+                IconButton(onClick = { accountModel.cancelLogin(); onBack() }, modifier = Modifier.tvFocusVisual().testTag("account_back")) {
                     Icon(Icons.AutoMirrored.Outlined.ArrowBack, "返回我的", tint = Ink)
                 }
                 Text("我的账号", color = Ink, fontSize = 24.sp, fontWeight = FontWeight.Bold)
@@ -138,7 +138,7 @@ internal fun AccountScreen(
                     Column(Modifier.fillMaxWidth().padding(16.dp)) {
                         state.message?.let { message ->
                             Text(message, color = Ink, fontSize = 14.sp, lineHeight = 22.sp,
-                                modifier = Modifier.testTag("account_message"))
+                                modifier = Modifier.tvFocusVisual().testTag("account_message"))
                         }
                         state.loginDiagnostic?.let { diagnostic ->
                             TextButton(onClick = {
@@ -147,9 +147,9 @@ internal fun AccountScreen(
                                     clipboard.setPrimaryClip(ClipData.newPlainText("红果登录诊断", diagnostic))
                                     diagnosticCopied = true
                                 }
-                            }, modifier = Modifier.testTag("account_copy_diagnostic")) { Text("复制诊断信息") }
+                            }, modifier = Modifier.tvFocusVisual().testTag("account_copy_diagnostic")) { Text("复制诊断信息") }
                             if (diagnosticCopied) Text("诊断信息已复制", color = Muted, fontSize = 12.sp,
-                                modifier = Modifier.testTag("account_diagnostic_copied"))
+                                modifier = Modifier.tvFocusVisual().testTag("account_diagnostic_copied"))
                         }
                         if (state.message != null) TextButton(onClick = accountModel::consumeMessage) { Text("知道了") }
                     }
@@ -165,13 +165,13 @@ internal fun AccountScreen(
         } else if (state.sessionStatus == AccountSessionStatus.WEBSITE_ONLY) {
             item {
                 Surface(color = Cream, shape = RoundedCornerShape(16.dp)) {
-                    Column(Modifier.fillMaxWidth().padding(16.dp).testTag("account_website_only"),
+                    Column(Modifier.fillMaxWidth().padding(16.dp).tvFocusVisual().testTag("account_website_only"),
                         verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         state.websiteProfile?.takeIf { it.nickname != null || it.avatarUrl != null }?.let { website ->
                             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                                 AccountAvatar(website.avatarUrl, 40.dp)
                                 Text(website.nickname ?: "红果用户", color = Ink, fontSize = 16.sp, fontWeight = FontWeight.Medium,
-                                    maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.testTag("account_website_name"))
+                                    maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.tvFocusVisual().testTag("account_website_name"))
                             }
                         }
                         Text("官网已登录，云片单待连接", color = Ink, fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
@@ -179,12 +179,12 @@ internal fun AccountScreen(
                             color = Muted, fontSize = 14.sp, lineHeight = 22.sp)
                         Text("连接账号后，才能查看云片单和开启进度同步。", color = Muted, fontSize = 12.sp, lineHeight = 20.sp)
                         Button(onClick = accountModel::retryWebsiteAccount, enabled = !state.busy,
-                            modifier = Modifier.fillMaxWidth().testTag("account_retry_website")) {
+                            modifier = Modifier.fillMaxWidth().tvFocusVisual().testTag("account_retry_website")) {
                             Text(if (state.busy) "正在连接账号…" else "重试连接账号")
                         }
                         if (state.busy) CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
                         TextButton(onClick = { logoutRequested = true }, enabled = !state.busy,
-                            modifier = Modifier.testTag("account_website_logout")) { Text("退出已保存的官网登录") }
+                            modifier = Modifier.tvFocusVisual().testTag("account_website_logout")) { Text("退出已保存的官网登录") }
                     }
                 }
             }
@@ -222,13 +222,13 @@ internal fun AccountScreen(
                                 Text("恢复网络后可重新验证；也可以退出已保存的账号后重新登录。", color = Muted,
                                     fontSize = 12.sp, lineHeight = 20.sp)
                                 OutlinedButton(onClick = accountModel::refresh, enabled = !state.busy,
-                                    modifier = Modifier.fillMaxWidth().testTag("account_verify_saved")) { Text("重新验证已保存账号") }
+                                    modifier = Modifier.fillMaxWidth().tvFocusVisual().testTag("account_verify_saved")) { Text("重新验证已保存账号") }
                             } else {
                                 Text("本机登录资料未能读取。清除已保存的登录态后可重新登录，本机收藏和观看记录继续保留。",
                                     color = Muted, fontSize = 12.sp, lineHeight = 20.sp)
                             }
                             TextButton(onClick = { logoutRequested = true }, enabled = !state.busy,
-                                modifier = Modifier.testTag("account_clear_saved")) {
+                                modifier = Modifier.tvFocusVisual().testTag("account_clear_saved")) {
                                 Text(if (localResetRequired) "清除本机保存的登录态" else "退出已保存账号")
                             }
                         }
@@ -294,22 +294,22 @@ private fun AccountProfileHeader(state: AccountState, model: AccountViewModel, o
             AccountAvatar(profile.avatarUrl, 56.dp)
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(profile.nickname.ifBlank { "红果用户" }, color = Ink, fontSize = 20.sp, fontWeight = FontWeight.SemiBold,
-                    maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.testTag("account_profile"))
+                    maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.tvFocusVisual().testTag("account_profile"))
                 Text("红果号 ${profile.id}", color = Muted, fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
             Box {
-                IconButton(onClick = { menuOpen = true }, modifier = Modifier.testTag("account_menu")) { Icon(Icons.Outlined.MoreVert, "账号操作", tint = Ink) }
+                IconButton(onClick = { menuOpen = true }, modifier = Modifier.tvFocusVisual().testTag("account_menu")) { Icon(Icons.Outlined.MoreVert, "账号操作", tint = Ink) }
                 DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
-                    DropdownMenuItem(text = { Text("同步此后观看进度") }, modifier = Modifier.testTag("account_sync_switch"),
+                    DropdownMenuItem(text = { Text("同步此后观看进度") }, modifier = Modifier.tvFocusVisual().testTag("account_sync_switch"),
                         trailingIcon = { Checkbox(checked = state.syncEnabled, onCheckedChange = null) },
                         onClick = { model.setSyncEnabled(!state.syncEnabled) })
-                    DropdownMenuItem(text = { Text("退出账号") }, modifier = Modifier.testTag("account_logout"),
+                    DropdownMenuItem(text = { Text("退出账号") }, modifier = Modifier.tvFocusVisual().testTag("account_logout"),
                         onClick = { menuOpen = false; onLogout() })
                 }
             }
         }
         state.stats?.takeIf { it.follows != null || it.fans != null || it.likes != null }?.let { stats ->
-            Surface(shape = RoundedCornerShape(14.dp), color = CardSurface, modifier = Modifier.testTag("account_stats")) {
+            Surface(shape = RoundedCornerShape(14.dp), color = CardSurface, modifier = Modifier.tvFocusVisual().testTag("account_stats")) {
                 Row(Modifier.fillMaxWidth().padding(vertical = 12.dp)) {
                     listOf("关注" to stats.follows, "粉丝" to stats.fans, "获赞" to stats.likes).forEach { (label, value) ->
                         Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(3.dp)) {
@@ -321,7 +321,7 @@ private fun AccountProfileHeader(state: AccountState, model: AccountViewModel, o
             }
         }
         if (state.pendingProgressCount > 0) Text("还有 ${state.pendingProgressCount} 条观看进度待确认",
-            color = Muted, fontSize = 12.sp, modifier = Modifier.testTag("account_pending_progress"))
+            color = Muted, fontSize = 12.sp, modifier = Modifier.tvFocusVisual().testTag("account_pending_progress"))
     }
 }
 
@@ -334,7 +334,7 @@ internal fun AccountAdvancedImport(state: AccountState, model: AccountViewModel)
     TextButton(onClick = {
         advancedOpen = !advancedOpen
         importedCookie = ""
-    }, modifier = Modifier.testTag("account_cookie_expand")) {
+    }, modifier = Modifier.tvFocusVisual().testTag("account_cookie_expand")) {
         Text(if (advancedOpen) "收起高级登录" else "高级：导入已有登录态", color = Muted, fontSize = 12.sp)
     }
     if (advancedOpen) {
@@ -345,13 +345,13 @@ internal fun AccountAdvancedImport(state: AccountState, model: AccountViewModel)
                 importedCookie = ""
             }, enabled = !state.busy, label = { Text("官网登录态") },
                 colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Cream, selectedLabelColor = AccentInk),
-                modifier = Modifier.testTag("account_cookie_source_web"))
+                modifier = Modifier.tvFocusVisual().testTag("account_cookie_source_web"))
             FilterChip(selected = appCookieSelected, onClick = {
                 appCookieSelected = true
                 importedCookie = ""
             }, enabled = !state.busy, label = { Text("红果 App 登录态") },
                 colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Cream, selectedLabelColor = AccentInk),
-                modifier = Modifier.testTag("account_cookie_source_app"))
+                modifier = Modifier.tvFocusVisual().testTag("account_cookie_source_app"))
         }
         if (appCookieSelected) Text("请确认输入来自你本人的红果 App 账号。通过手机云账号验证后才能使用云片单。",
             color = Muted, fontSize = 12.sp, lineHeight = 20.sp)
@@ -361,14 +361,14 @@ internal fun AccountAdvancedImport(state: AccountState, model: AccountViewModel)
             shape = RoundedCornerShape(16.dp),
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            enabled = !state.busy, modifier = Modifier.fillMaxWidth().testTag("account_cookie_input"))
+            enabled = !state.busy, modifier = Modifier.fillMaxWidth().tvFocusVisual().testTag("account_cookie_input"))
         OutlinedButton(onClick = {
             val candidate = importedCookie
             importedCookie = ""
             model.cancelLogin()
             if (appCookieSelected) model.importAppCookie(candidate) else model.importCookie(candidate)
         }, enabled = !state.busy && importedCookie.isNotBlank(),
-            modifier = Modifier.fillMaxWidth().testTag("account_cookie_submit")) {
+            modifier = Modifier.fillMaxWidth().tvFocusVisual().testTag("account_cookie_submit")) {
             Text("校验并登录")
         }
     }
