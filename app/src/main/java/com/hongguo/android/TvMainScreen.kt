@@ -11,6 +11,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -367,7 +368,28 @@ private fun TvHomeContent(state: HongguoUiState, model: HongguoViewModel) {
                 }
             }
         }
-        if (cards.isNotEmpty()) item { TvPosterRail("热门推荐", cards, onClick = model::openDrama) }
+        if (cards.isNotEmpty()) item {
+            Column(verticalArrangement = Arrangement.spacedBy(13.dp)) {
+                Text("热门推荐", color = TvText, fontSize = 21.sp, fontWeight = FontWeight.Bold)
+                BoxWithConstraints(Modifier.fillMaxWidth()) {
+                    val columns = ((maxWidth + 14.dp) / 174.dp).toInt().coerceAtLeast(2)
+                    val rows = cards.chunked(columns)
+                    Column(verticalArrangement = Arrangement.spacedBy(18.dp)) {
+                        rows.forEach { rowCards ->
+                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                                rowCards.forEach { card ->
+                                    TvPosterCard(card,
+                                        if (card.episodeCount > 0) "全 ${card.episodeCount} 集" else "短剧",
+                                        onClick = { model.openDrama(card) },
+                                        modifier = Modifier.weight(1f))
+                                }
+                                repeat(columns - rowCards.size) { Spacer(Modifier.weight(1f)) }
+                            }
+                        }
+                    }
+                }
+            }
+        }
         if (state.history.isNotEmpty()) item {
             TvPosterRail("继续观看", state.history.map { it.card }, onClick = { card ->
                 state.history.firstOrNull { it.card.id == card.id }?.let(model::openLibrary)
@@ -403,10 +425,15 @@ private fun TvPosterRail(
 }
 
 @Composable
-private fun TvPosterCard(card: DramaCard, subtitle: String, onClick: () -> Unit) {
+private fun TvPosterCard(
+    card: DramaCard,
+    subtitle: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier.width(142.dp),
+) {
     var focused by remember { mutableStateOf(false) }
     val scale by animateFloatAsState(if (focused) 1.055f else 1f, label = "tv_poster_scale")
-    Column(Modifier.width(142.dp).graphicsLayer(scaleX = scale, scaleY = scale)
+    Column(modifier.graphicsLayer(scaleX = scale, scaleY = scale)
         .clip(RoundedCornerShape(13.dp))
         .background(if (focused) TvPanelFocused else Color.Transparent)
         .clickable(onClick = onClick).onFocusChanged { focused = it.isFocused }
