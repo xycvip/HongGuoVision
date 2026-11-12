@@ -89,6 +89,12 @@ internal fun Context.isTelevisionDevice(): Boolean {
 internal class TvActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (!shouldUseTvInterface()) {
+            startActivity(android.content.Intent(this, MainActivity::class.java).addFlags(
+                android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP or android.content.Intent.FLAG_ACTIVITY_NEW_TASK))
+            finish()
+            return
+        }
         requestedOrientation = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
         setContent {
             val model: HongguoViewModel = viewModel()
@@ -250,7 +256,8 @@ private fun TvMainScreen(
                 state.tab == AppTab.ACCOUNT -> AccountScreen(accountModel, onBack = model::closeAccount,
                     onOpenLibrary = model::openLibrary)
                 state.tab == AppTab.SETTINGS -> SystemSettingsScreen(state, model, updateState, updateModel,
-                    onTheme = { model.selectTab(AppTab.THEME_STYLE) }, onBack = model::closeSettings)
+                    onTheme = { model.selectTab(AppTab.THEME_STYLE) }, onBack = model::closeSettings,
+                    displayMode = currentDisplayMode(), onDisplayMode = { mode -> switchDisplayMode(mode) })
                 state.tab == AppTab.THEME_STYLE -> ThemeStyleScreen(state, model, model::closeThemeStyle)
                 state.tab == AppTab.PLAY_HISTORY -> PlayHistoryScreen(state, model, accountModel)
                 state.tab == AppTab.LOCAL_FAVORITES -> LocalFavoritesScreen(state, model)

@@ -86,6 +86,7 @@ internal object ThemePreferences {
     const val CURRENT_ONBOARDING_VERSION = 2
     /** 底栏样式; absent until the user picks one, so the device default can still apply. */
     const val NAV_BAR_STYLE = "nav_bar_style"
+    const val DISPLAY_MODE = "display_mode"
 }
 
 /** Bottom bar look, chosen in 我的 › 设置. */
@@ -304,4 +305,16 @@ internal fun Modifier.quietSelectable(selected: Boolean, role: Role = Role.Tab, 
     val dim by animateFloatAsState(if (pressed) .55f else 1f, tween(if (pressed) 60 else 160), label = "tab_press")
     this.selectable(selected = selected, interactionSource = source, indication = null, role = role, onClick = onClick)
         .graphicsLayer { alpha = dim }
+}
+
+
+/** Interface layout selection shared by phone and TV activities. */
+enum class AppDisplayMode(val key: String, val label: String) {
+    AUTO("auto", "自动适应"),
+    PHONE("phone", "手机界面"),
+    TV("tv", "TV界面");
+
+    companion object {
+        fun fromKey(key: String?): AppDisplayMode = entries.firstOrNull { it.key == key } ?: AUTO
+    }
 }

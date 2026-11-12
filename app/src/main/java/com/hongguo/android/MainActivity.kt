@@ -58,7 +58,7 @@ import com.hongguo.account.AccountViewModel
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (isTelevisionDevice()) {
+        if (shouldUseTvInterface()) {
             startActivity(android.content.Intent(this, TvActivity::class.java))
             finish()
             return
@@ -198,7 +198,8 @@ class MainActivity : ComponentActivity() {
                                 AppTab.ACCOUNT -> AccountScreen(accountModel, onBack = model::closeAccount,
                                     onOpenLibrary = model::openLibrary)
                                 AppTab.SETTINGS -> SystemSettingsScreen(tabState, model, updateState, updateModel,
-                                    onTheme = { model.selectTab(AppTab.THEME_STYLE) }, onBack = model::closeSettings)
+                                    onTheme = { model.selectTab(AppTab.THEME_STYLE) }, onBack = model::closeSettings,
+                                    displayMode = currentDisplayMode(), onDisplayMode = { mode -> switchDisplayMode(mode) })
                                 AppTab.THEME_STYLE -> ThemeStyleScreen(tabState, model, model::closeThemeStyle)
                                 AppTab.PLAY_HISTORY -> PlayHistoryScreen(tabState, model, accountModel)
                                 AppTab.LOCAL_FAVORITES -> LocalFavoritesScreen(tabState, model)

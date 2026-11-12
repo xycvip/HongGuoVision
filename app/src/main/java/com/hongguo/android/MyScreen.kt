@@ -214,6 +214,8 @@ internal fun SystemSettingsScreen(state: HongguoUiState, model: HongguoViewModel
                         trailing = state.themeStyle.label, onClick = onTheme)
                     HorizontalDivider(color = Canvas, modifier = Modifier.padding(horizontal = 18.dp))
                     NavBarStyleSetting(state.navBarStyle, model::setNavBarStyle)
+                    HorizontalDivider(color = Canvas, modifier = Modifier.padding(horizontal = 18.dp))
+                    DisplayModeSetting(displayMode, onDisplayMode)
                 }
             }
         }
@@ -412,6 +414,32 @@ private fun NavBarStyleSetting(selected: NavBarStyle, onSelect: (NavBarStyle) ->
                     .testTag("settings_navbar_${style.key}"), contentAlignment = Alignment.Center) {
                     Text(style.label, color = if (isSelected) Ink else Muted, fontSize = 14.sp,
                         fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun DisplayModeSetting(selected: AppDisplayMode, onSelect: (AppDisplayMode) -> Unit) {
+    Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 14.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text("界面模式", color = Ink, fontSize = 16.sp, fontWeight = FontWeight.Medium)
+            Text("自动适应设备，也可以手动切换手机或电视布局", color = Muted, fontSize = 12.sp, lineHeight = 18.sp)
+        }
+        Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(Cream)
+            .padding(4.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            AppDisplayMode.entries.forEach { mode ->
+                val active = selected == mode
+                Surface(onClick = { onSelect(mode) }, shape = RoundedCornerShape(9.dp),
+                    color = if (active) CardSurface else Color.Transparent,
+                    shadowElevation = if (active) 1.dp else 0.dp,
+                    modifier = Modifier.weight(1f).heightIn(min = 44.dp).testTag("display_mode_${mode.key}")) {
+                    Box(Modifier.padding(horizontal = 2.dp, vertical = 8.dp), contentAlignment = Alignment.Center) {
+                        Text(mode.label, color = if (active) Ink else Muted, fontSize = 13.sp,
+                            fontWeight = if (active) FontWeight.SemiBold else FontWeight.Normal, maxLines = 1)
+                    }
                 }
             }
         }
