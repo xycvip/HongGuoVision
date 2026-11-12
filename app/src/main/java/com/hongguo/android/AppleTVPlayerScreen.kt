@@ -106,6 +106,7 @@ internal fun AppleTVPlayerScreen(
     )
     val playFocus = remember { FocusRequester() }
     val infoFocus = remember { FocusRequester() }
+    val infoTabFocus = remember { FocusRequester() }
     var showInfo by rememberSaveable(detail.id) { mutableStateOf(false) }
     var infoTab by rememberSaveable(detail.id) { mutableStateOf("选集") }
     var targetEpisode by rememberSaveable(detail.id) { mutableStateOf(state.episodePosition.coerceAtLeast(0)) }
@@ -114,6 +115,9 @@ internal fun AppleTVPlayerScreen(
     }
     androidx.compose.runtime.LaunchedEffect(playback.player != null) {
         runCatching { if (playback.player != null) playFocus.requestFocus() else infoFocus.requestFocus() }
+    }
+    androidx.compose.runtime.LaunchedEffect(showInfo) {
+        runCatching { if (showInfo) infoTabFocus.requestFocus() else infoFocus.requestFocus() }
     }
     DisposableEffect(active, activity, view, lifecycle, model) {
         if (!active) return@DisposableEffect onDispose { }
@@ -234,7 +238,8 @@ internal fun AppleTVPlayerScreen(
             ) {
                 Row(Modifier.focusGroup(), horizontalArrangement = Arrangement.spacedBy(appleTVDp(12f))) {
                     listOf("选集", "相关作品", "倍速", "清晰度").forEach { tab ->
-                        AppleTVControl(tab, selected = infoTab == tab) { infoTab = tab }
+                        AppleTVControl(tab, selected = infoTab == tab,
+                            modifier = if (tab == "选集") Modifier.focusRequester(infoTabFocus) else Modifier) { infoTab = tab }
                     }
                 }
                 Spacer(Modifier.height(appleTVDp(18f)))
