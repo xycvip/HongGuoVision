@@ -95,7 +95,7 @@ internal fun CardsHome(state: HongguoUiState, model: HongguoViewModel) {
         item(span = StaggeredGridItemSpan.FullLine) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 Row(Modifier.weight(1f).clip(RoundedCornerShape(50)).background(CardSurface)
-                    .clickable(role = Role.Button) { model.selectTab(AppTab.SEARCH) }.heightIn(min = 40.dp)
+                    .tvFocusVisual().clickable(role = Role.Button) { model.selectTab(AppTab.SEARCH) }.heightIn(min = 40.dp)
                     .padding(horizontal = 14.dp).testTag("cards_search"),
                     verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Icon(Icons.Outlined.Search, null, tint = Muted, modifier = Modifier.size(20.dp))
@@ -149,7 +149,7 @@ internal fun CardsHome(state: HongguoUiState, model: HongguoViewModel) {
                     Text(when (state.homeFeed) { HomeFeed.LATEST -> "新剧榜"; HomeFeed.COMIC -> "漫剧榜"; HomeFeed.GUESS -> "为你推荐"; else -> "热度榜" },
                         color = Ink, fontSize = 17.sp, fontWeight = FontWeight.Black, modifier = Modifier.padding(bottom = 2.dp))
                     ranked.forEachIndexed { index, card ->
-                        Row(Modifier.fillMaxWidth().clickable { model.openDrama(card) }.heightIn(min = 52.dp)
+                        Row(Modifier.fillMaxWidth().tvFocusVisual().clickable { model.openDrama(card) }.heightIn(min = 52.dp)
                             .padding(vertical = 4.dp).testTag("cards_rank_$index"),
                             verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                             Text("${index + 1}", color = if (index < 3) AccentInk else Muted, fontSize = 18.sp,
@@ -358,7 +358,7 @@ internal fun CardsLibrary(state: HongguoUiState, model: HongguoViewModel, accoun
                 val row = entries.chunked(3)[rowIndex]
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     row.forEach { entry ->
-                        Column(Modifier.weight(1f).clickable { model.openLibrary(entry) }.testTag("cards_entry_${entry.card.id}"),
+                        Column(Modifier.weight(1f).tvFocusVisual().clickable { model.openLibrary(entry) }.testTag("cards_entry_${entry.card.id}"),
                             verticalArrangement = Arrangement.spacedBy(6.dp)) {
                             Box(Modifier.fillMaxWidth().aspectRatio(.75f).clip(RoundedCornerShape(10.dp))) {
                                 PosterImage(entry.card.cover, Modifier.fillMaxSize())
@@ -469,7 +469,7 @@ internal fun CardsDetail(state: HongguoUiState, model: HongguoViewModel, account
                             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 row.forEach { index ->
                                     EpisodeSquare(detail.episodes[index].index, state.episodePosition == index,
-                                        Modifier.weight(1f).height(48.dp).testTag("episode_all_$index")) { model.playEpisode(index) }
+                                        Modifier.weight(1f).height(48.dp).tvFocusVisual().testTag("episode_all_$index")) { model.playEpisode(index) }
                                 }
                                 repeat(6 - row.size) { Spacer(Modifier.weight(1f)) }
                             }
