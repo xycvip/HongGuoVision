@@ -192,17 +192,29 @@ jobs:
           - APK SHA-256：${{ steps.verify.outputs.apk_sha256 }}
           - APK 大小：${{ steps.verify.outputs.apk_size }} 字节
 
-          本版本为内部测试预发布版本，不代表正式稳定版。
+          本版本为 HongGuoVision 测试仓库发布的普通 Release，仅用于内部测试。
           EOF
+
+          jq -n \
+            --arg appId "com.x.hgvision" \
+            --argjson versionCode "$VERSION_CODE" \
+            --arg versionName "$VERSION_NAME" \
+            --arg apkUrl "https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG}/${APK_NAME}" \
+            --arg sha256 "${{ steps.verify.outputs.apk_sha256 }}" \
+            --argjson sizeBytes "${{ steps.verify.outputs.apk_size }}" \
+            --arg notes "${RELEASE_NOTES_INPUT:-内部测试版本}" \
+            --arg publishedAt "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            '{schemaVersion:1, applicationId:$appId, versionCode:$versionCode, versionName:$versionName, apkUrl:$apkUrl, sha256:$sha256, sizeBytes:$sizeBytes, minSdk:26, notes:$notes, publishedAt:$publishedAt}' \
+            > update.json
 
           gh release create "$TAG" \
             "$APK_NAME" \
             "$SOURCE_ZIP" \
             "$CHECKSUM_FILE" \
+            update.json \
             --repo "$GITHUB_REPOSITORY" \
             --title "$TITLE" \
             --notes-file release-notes.md \
-            --prerelease \
             --target "${{ steps.version.outputs.source_sha }}"
 
           {
