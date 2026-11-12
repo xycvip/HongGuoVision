@@ -115,6 +115,7 @@ internal fun AppleTVPlayerScreen(
     val playFocus = remember { FocusRequester() }
     val infoFocus = remember { FocusRequester() }
     val infoTabFocus = remember { FocusRequester() }
+    var initialPlayerFocusSet by remember { mutableStateOf(false) }
     var showInfo by rememberSaveable(detail.id) { mutableStateOf(false) }
     var infoTab by rememberSaveable(detail.id) { mutableStateOf("选集") }
     var targetEpisode by rememberSaveable(detail.id) { mutableStateOf(state.episodePosition.coerceAtLeast(0)) }
@@ -122,7 +123,12 @@ internal fun AppleTVPlayerScreen(
         mutableFloatStateOf(if (playback.durationMs > 0) playback.positionMs.toFloat() / playback.durationMs else 0f)
     }
     androidx.compose.runtime.LaunchedEffect(playback.player != null) {
-        runCatching { if (playback.player != null) playFocus.requestFocus() else infoFocus.requestFocus() }
+        if (!initialPlayerFocusSet) runCatching {
+            if (playback.player != null) {
+                playFocus.requestFocus()
+                initialPlayerFocusSet = true
+            } else infoFocus.requestFocus()
+        }
     }
     androidx.compose.runtime.LaunchedEffect(showInfo) {
         runCatching { if (showInfo) infoTabFocus.requestFocus() else infoFocus.requestFocus() }
