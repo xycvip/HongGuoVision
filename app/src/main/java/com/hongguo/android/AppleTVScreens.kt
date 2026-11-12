@@ -172,7 +172,7 @@ private fun AppleTVHome(state: HongguoUiState, model: HongguoViewModel) {
         HomeFeed.COMIC to "漫剧",
     )
     AppleTVSection(
-        canvasHeight = androidx.compose.ui.platform.LocalConfiguration.current.screenHeightDp.dp,
+        canvasHeight = appleTVLibraryCanvasHeight(),
         status = state.home.error ?: if (state.home.loading) "正在加载…" else "共 ${state.home.items.size} 部",
         emptyText = "看看下一部好故事",
         emptyIcon = Icons.Outlined.PlayCircleOutline,
@@ -197,7 +197,7 @@ private fun AppleTVHome(state: HongguoUiState, model: HongguoViewModel) {
 private fun AppleTVDiscover(state: HongguoUiState, model: HongguoViewModel) {
     val genres = listOf("comic_series" to "漫剧", "short_play" to "真人剧", "ai_series" to "AI 剧")
     AppleTVSection(
-        canvasHeight = androidx.compose.ui.platform.LocalConfiguration.current.screenHeightDp.dp,
+        canvasHeight = appleTVLibraryCanvasHeight(),
         status = state.category.error ?: if (state.category.loading) "正在加载…" else "共 ${state.category.items.size} 部",
         emptyText = "暂无内容",
         emptyIcon = Icons.Outlined.VideoLibrary,
@@ -238,7 +238,7 @@ private fun AppleTVDiscover(state: HongguoUiState, model: HongguoViewModel) {
 @Composable
 private fun AppleTVRank(state: HongguoUiState, model: HongguoViewModel) {
     AppleTVSection(
-        canvasHeight = androidx.compose.ui.platform.LocalConfiguration.current.screenHeightDp.dp,
+        canvasHeight = appleTVLibraryCanvasHeight(),
         status = state.rankError ?: if (state.rankLoading) "正在加载榜单…" else "共 ${state.rankEntries.size} 部",
         emptyText = "暂无榜单内容",
         emptyIcon = Icons.Outlined.Leaderboard,
@@ -264,7 +264,7 @@ private fun AppleTVRank(state: HongguoUiState, model: HongguoViewModel) {
 @Composable
 private fun AppleTVSearch(state: HongguoUiState, model: HongguoViewModel) {
     AppleTVSection(
-        canvasHeight = androidx.compose.ui.platform.LocalConfiguration.current.screenHeightDp.dp,
+        canvasHeight = appleTVLibraryCanvasHeight(),
         status = state.searchError ?: if (state.searching) "正在搜索…" else "搜索结果 ${state.results.size} 部",
         emptyText = if (state.searchedQuery.isBlank()) "点击顶部搜索框输入剧名" else "暂无搜索结果",
         emptyIcon = Icons.Outlined.Search,
@@ -313,7 +313,7 @@ private fun AppleTVMine(
             if (qrBitmap != null) Modifier.focusProperties { canFocus = false } else Modifier
         )) {
         AppleTVSection(
-            canvasHeight = androidx.compose.ui.platform.LocalConfiguration.current.screenHeightDp.dp,
+            canvasHeight = appleTVLibraryCanvasHeight(),
             status = accountState.message?.takeIf { it.isNotBlank() } ?: accountStatus,
             emptyText = when (category) { "历史" -> "暂无观看记录"; "预约" -> "暂无已上线预约"; else -> "暂无收藏" },
             filters = {
