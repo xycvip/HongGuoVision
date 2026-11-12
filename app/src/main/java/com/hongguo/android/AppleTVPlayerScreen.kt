@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -365,7 +366,7 @@ private fun AppleTVStepButton(icon: ImageVector, onClick: () -> Unit) {
             .clip(shape)
             .background(AppleTVColors.normalFill)
             .then(if (focused) Modifier.border(appleTVDp(2f), AppleTVColors.accent, shape)
-                else Modifier.border(1.dp, Color.White.copy(alpha = .35f), shape))
+                else Modifier.border(appleTVDp(1f), Color.White.copy(alpha = .35f), shape))
             .clickable(onClick = onClick)
             .focusable(),
         contentAlignment = Alignment.Center,
