@@ -89,7 +89,7 @@ internal fun CardsHome(state: HongguoUiState, model: HongguoViewModel) {
     // Staggered columns lay out independently, so the last visible entry is not always the highest index.
     LoadAheadEffect(state.home, { grid.layoutInfo.visibleItemsInfo.maxOfOrNull { it.index } ?: -1 },
         { grid.layoutInfo.totalItemsCount }, onLoad = model::loadMoreHome)
-    LazyVerticalStaggeredGrid(columns = StaggeredGridCells.Fixed(2), state = grid, modifier = Modifier.fillMaxSize().testTag("cards_home"),
+    LazyVerticalStaggeredGrid(columns = if (LocalTvMode.current) StaggeredGridCells.Adaptive(220.dp) else StaggeredGridCells.Fixed(2), state = grid, modifier = Modifier.fillMaxSize().testTag("cards_home"),
         contentPadding = PaddingValues(start = 12.dp, end = 12.dp, top = 6.dp, bottom = 24.dp).plusNavClearance(),
         horizontalArrangement = Arrangement.spacedBy(8.dp), verticalItemSpacing = 8.dp) {
         item(span = StaggeredGridItemSpan.FullLine) {
@@ -187,7 +187,7 @@ internal fun CardsHome(state: HongguoUiState, model: HongguoViewModel) {
 
 @Composable
 private fun WaterfallCard(card: DramaCard, ratio: Float, tag: String, modifier: Modifier = Modifier, onClick: () -> Unit) {
-    Surface(onClick = onClick, color = CardSurface, shape = RoundedCornerShape(12.dp), modifier = modifier.testTag(tag)) {
+    Surface(onClick = onClick, color = CardSurface, shape = RoundedCornerShape(12.dp), modifier = modifier.tvFocusVisual().testTag(tag)) {
         Column {
             PosterImage(card.cover, Modifier.fillMaxWidth().aspectRatio(ratio))
             Column(Modifier.padding(horizontal = 10.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
