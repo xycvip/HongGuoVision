@@ -221,7 +221,7 @@ internal fun AppleTVPosterCard(
 
 @Composable
 private fun coverWidthForTV(): Dp {
-    val canvasHeight = androidx.compose.ui.platform.LocalConfiguration.current.screenHeightDp.dp
+    val canvasHeight = appleTVLibraryCanvasHeight()
     val coverHeight = ((AppleTVLayout.height(AppleTVLayout.CARD_VH, canvasHeight) - appleTVDp(140f)) / AppleTVLayout.FOCUS_SCALE)
         .coerceAtLeast(appleTVDp(160f))
     return coverHeight * 2f / 3f
