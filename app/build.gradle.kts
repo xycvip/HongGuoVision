@@ -18,8 +18,22 @@ android {
         testInstrumentationRunner = "com.hongguo.android.HongguoTestRunner"
     }
     buildTypes {
+        debug {
+            // The TV test APK is also used for installation checks, so shrink it too.
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
     compileOptions {
