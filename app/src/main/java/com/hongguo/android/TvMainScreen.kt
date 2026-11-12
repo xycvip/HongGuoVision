@@ -270,9 +270,9 @@ private fun TvMainScreen(
                     displayMode = displayMode, onDisplayMode = onDisplayMode,
                     onTheme = { model.selectTab(AppTab.THEME_STYLE) }, onBack = model::closeSettings,
                     onAutoPlay = model::setAutoPlayNext, onPreload = model::setPreloadNext)
-                state.tab == AppTab.THEME_STYLE -> ThemeStyleScreen(state, model, model::closeThemeStyle)
-                state.tab == AppTab.PLAY_HISTORY -> PlayHistoryScreen(state, model, accountModel)
-                state.tab == AppTab.LOCAL_FAVORITES -> LocalFavoritesScreen(state, model)
+                state.tab == AppTab.THEME_STYLE -> TvThemeStyleContent(state, model, onBack = model::closeThemeStyle)
+                state.tab == AppTab.PLAY_HISTORY -> TvLibraryContent(state, model, history = true)
+                state.tab == AppTab.LOCAL_FAVORITES -> TvLibraryContent(state, model, history = false)
             }
         }
     }
@@ -480,8 +480,7 @@ private fun TvRankContent(state: HongguoUiState, model: HongguoViewModel) {
 }
 
 @Composable
-private fun TvLibraryContent(state: HongguoUiState, model: HongguoViewModel) {
-    val history = state.tab == AppTab.HISTORY
+private fun TvLibraryContent(state: HongguoUiState, model: HongguoViewModel, history: Boolean = state.tab == AppTab.HISTORY) {
     val entries = if (history) state.history else state.favorites
     Column(Modifier.fillMaxSize()) {
         Text(if (history) "观看历史" else "追剧收藏", color = TvText, fontSize = 30.sp, fontWeight = FontWeight.Black,
@@ -825,6 +824,85 @@ private fun TvSettingsToggle(title: String, subtitle: String, checked: Boolean, 
             }
             Text(if (checked) "已开启" else "已关闭", color = if (checked) TvAccent else TvMuted,
                 fontSize = 14.sp, fontWeight = FontWeight.Bold)
+        }
+    }
+}
+
+
+@Composable
+private fun TvThemeStyleContent(state: HongguoUiState, model: HongguoViewModel, onBack: () -> Unit) {
+    val currentMode = state.themeMode.orDefaultFor(state.themeStyle)
+    LazyColumn(Modifier.fillMaxSize().padding(end = 18.dp).testTag("tv_theme_style"),
+        contentPadding = PaddingValues(bottom = 32.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
+        item {
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(18.dp)) {
+                TvAction("返回设置", onClick = onBack, secondary = true)
+                Text("主题样式", color = TvText, fontSize = 30.sp, fontWeight = FontWeight.Black)
+            }
+        }
+        item {
+            Text("选择电视端的视觉风格，切换后立即生效。手机端的页面布局不受影响。",
+                color = TvMuted, fontSize = 14.sp)
+        }
+        item {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                AppThemeStyle.entries.forEach { style ->
+                    TvThemeStyleOption(style, selected = state.themeStyle == style,
+                        modifier = Modifier.weight(1f)) { model.setThemeStyle(style) }
+                }
+            }
+        }
+        item {
+            TvSettingsGroup("外观模式", "选择浅色、深色或跟随系统") {
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    ThemeMode.entries.forEach { mode ->
+                        TvSettingsChoice(mode.label, selected = currentMode == mode,
+                            modifier = Modifier.weight(1f)) { model.setThemeMode(mode) }
+                    }
+                }
+            }
+        }
+        item {
+            Text(state.themeStyle.summary, color = TvMuted, fontSize = 14.sp, lineHeight = 22.sp)
+        }
+    }
+}
+
+@Composable
+private fun TvThemeStyleOption(
+    style: AppThemeStyle,
+    selected: Boolean,
+    modifier: Modifier,
+    onClick: () -> Unit,
+) {
+    var focused by remember { mutableStateOf(false) }
+    val palette = style.palette(dark = true)
+    Surface(onClick = onClick, shape = RoundedCornerShape(16.dp),
+        color = if (focused) TvPanelFocused else TvPanel,
+        border = BorderStroke(2.dp, when { focused -> TvAccent; selected -> TvAccent; else -> TvMuted.copy(alpha = .25f) }),
+        modifier = modifier.heightIn(min = 210.dp).onFocusChanged { focused = it.isFocused }) {
+        Column(Modifier.fillMaxWidth().padding(14.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Box(Modifier.fillMaxWidth().height(88.dp).clip(RoundedCornerShape(10.dp)).background(palette.canvas)
+                .border(1.dp, palette.line, RoundedCornerShape(10.dp))) {
+                Box(Modifier.fillMaxWidth().height(24.dp).background(palette.card))
+                Box(Modifier.fillMaxWidth(.55f).height(5.dp).padding(start = 8.dp, top = 7.dp)
+                    .background(palette.accent))
+                Row(Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(7.dp),
+                    horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                    repeat(4) { index ->
+                        Box(Modifier.weight(1f).height(38.dp).clip(RoundedCornerShape(4.dp))
+                            .background(if (index == 1) palette.accent else palette.card))
+                    }
+                }
+            }
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(style.label, color = TvText, fontSize = 18.sp, fontWeight = FontWeight.Bold,
+                    modifier = Modifier.weight(1f))
+                if (selected) Text("当前", color = TvAccent, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+            }
+            Text(style.summary, color = TvMuted, fontSize = 12.sp, lineHeight = 18.sp,
+                maxLines = 3, overflow = TextOverflow.Ellipsis)
         }
     }
 }
