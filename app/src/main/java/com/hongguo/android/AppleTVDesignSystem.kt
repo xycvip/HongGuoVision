@@ -176,7 +176,7 @@ internal fun AppleTVTabButton(
 @Composable
 internal fun AppleTVPosterCard(
     card: DramaCard,
-    subtitle: String = if (card.episodeCount > 0) "${card.episodeCount} 集" else "",
+    subtitle: String = card.badge.ifBlank { if (card.episodeCount > 0) "全 ${card.episodeCount} 集" else "" },
     rankText: String = "",
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
