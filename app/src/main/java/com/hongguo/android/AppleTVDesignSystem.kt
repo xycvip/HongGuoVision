@@ -38,7 +38,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.text.TextUnit
+import androidx.compose.ui.unit.TextUnit
 
 /**
  * Apple TV layout measurements translated from the reference tvOS layout system.
