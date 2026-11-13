@@ -21,6 +21,12 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.FastForward
+import androidx.compose.material.icons.outlined.FastRewind
+import androidx.compose.material.icons.outlined.PlayArrow
+import androidx.compose.material.icons.outlined.SkipNext
+import androidx.compose.material.icons.outlined.SkipPrevious
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Slider
@@ -39,9 +45,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.focusGroup
+import androidx.compose.foundation.focusGroup
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.draw.clip
@@ -282,25 +290,25 @@ internal fun AppleTVPlayerScreen(
                                 color = Color.White, fontSize = appleTVSp(22f), fontWeight = FontWeight.Bold)
                             Spacer(Modifier.height(appleTVDp(14f)))
                             Row(Modifier.focusGroup(), horizontalArrangement = Arrangement.spacedBy(appleTVDp(16f)), verticalAlignment = Alignment.CenterVertically) {
-                                AppleTVStepButton(androidx.compose.material.icons.Icons.Outlined.FastRewind) {
+                                AppleTVStepButton(Icons.Outlined.FastRewind) {
                                     targetEpisode = (selectedEpisode - 10).coerceAtLeast(0)
                                 }
-                                AppleTVStepButton(androidx.compose.material.icons.Icons.Outlined.SkipPrevious) {
+                                AppleTVStepButton(Icons.Outlined.SkipPrevious) {
                                     targetEpisode = (selectedEpisode - 1).coerceAtLeast(0)
                                 }
                                 Text("${selectedEpisode + 1}", color = Color.White,
                                     fontSize = appleTVSp(40f), fontWeight = FontWeight.Bold, textAlign = TextAlign.Center,
                                     modifier = Modifier.widthIn(min = appleTVDp(100f)))
-                                AppleTVStepButton(androidx.compose.material.icons.Icons.Outlined.SkipNext) {
+                                AppleTVStepButton(Icons.Outlined.SkipNext) {
                                     targetEpisode = (selectedEpisode + 1).coerceAtMost(detail.episodes.lastIndex)
                                 }
-                                AppleTVStepButton(androidx.compose.material.icons.Icons.Outlined.FastForward) {
+                                AppleTVStepButton(Icons.Outlined.FastForward) {
                                     targetEpisode = (selectedEpisode + 10).coerceAtMost(detail.episodes.lastIndex)
                                 }
                                 if (selectedEpisode == state.episodePosition) {
                                     Text("正在播放", color = AppleTVColors.secondary, fontSize = appleTVSp(16f), fontWeight = FontWeight.SemiBold)
                                 } else {
-                                    AppleTVControl("播放该集", icon = androidx.compose.material.icons.Icons.Outlined.PlayArrow,
+                                    AppleTVControl("播放该集", icon = Icons.Outlined.PlayArrow,
                                         paddingH = 16.dp, paddingV = 8.dp) {
                                         model.playEpisode(selectedEpisode)
                                         showInfo = false
